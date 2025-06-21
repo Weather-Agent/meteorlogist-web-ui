@@ -1,4 +1,5 @@
 import { getAuthToken } from './authService';
+import { generateCityDataFromResponse } from './geminiService';
 
 // Use proxy path for development to avoid CORS issues
 const BASE_URL = import.meta.env.DEV ? '/api/apps' : 'http://127.0.0.1:8000/apps';
@@ -91,7 +92,9 @@ export const sendMessageToSession = async (message) => {
         'accept': 'application/json'
       },
       body: JSON.stringify(payload)
-    }); if (!response.ok) {
+    });
+
+    if (!response.ok) {
       const errorText = await response.text();
       console.error(`Failed to send message: ${response.status} - ${errorText}`);
       // If session is invalid (404), create a new one and retry
@@ -115,23 +118,29 @@ export const sendMessageToSession = async (message) => {
           },
           body: JSON.stringify(payload)
         });
+
         if (!retryResponse.ok) {
           const retryErrorText = await retryResponse.text();
           throw new Error(`Failed to send message after retry: ${retryResponse.status} - ${retryErrorText}`);
         }
-        const retryEvents = await retryResponse.json();        // Process the retry events the same way as normal events
+
+        const retryEvents = await retryResponse.json();
+        // Process the retry events the same way as normal events
         const finalResponse = retryEvents
           .filter(event => event.content?.parts?.[0]?.text &&
             event.content.parts[0].text.trim().length > 0)
           .pop();
 
         if (finalResponse) {
+          const cityData = await generateCityDataFromResponse(finalResponse.content.parts[0].text);
+          
           return {
             status: 'success',
             response: finalResponse.content.parts[0].text,
             weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
             location: extractLocation(message),
-            coordinates: getCoordinatesForLocation(extractLocation(message))
+            coordinates: getCoordinatesForLocation(extractLocation(message)),
+            cityData: cityData
           };
         }
 
@@ -143,7 +152,9 @@ export const sendMessageToSession = async (message) => {
       }
 
       throw new Error(`Failed to send message: ${response.status} - ${errorText}`);
-    } const events = await response.json();
+    }
+
+    const events = await response.json();
     console.log('Received events:', events);
 
     // Find the final response from any agent with text content
@@ -153,12 +164,15 @@ export const sendMessageToSession = async (message) => {
       .pop();
 
     if (finalResponse) {
+      const cityData = await generateCityDataFromResponse(finalResponse.content.parts[0].text);
+      
       return {
         status: 'success',
         response: finalResponse.content.parts[0].text,
         weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
         location: extractLocation(message),
-        coordinates: getCoordinatesForLocation(extractLocation(message))
+        coordinates: getCoordinatesForLocation(extractLocation(message)),
+        cityData: cityData
       };
     }
 
@@ -357,9 +371,7 @@ export const processWeatherQuery = async (query) => {
     if (!response.ok) {
       console.error(`Backend API error: ${response.status}`);
       throw new Error(`Weather API error: ${response.status}`);
-    }
-
-    const data = await response.json();
+    }    const data = await response.json();
     console.log('Response from backend:', data);
 
     if (data.weatherPattern) {
@@ -380,6 +392,11 @@ export const processWeatherQuery = async (query) => {
     const emergencyPatterns = ['fire', 'earthquake', 'flood', 'tsunami', 'hurricane'];
     if (data.weatherPattern && emergencyPatterns.includes(data.weatherPattern)) {
       console.log(`IMPORTANT: Emergency pattern detected: ${data.weatherPattern}`);
+    }
+
+    // Generate city data if response is available
+    if (data.response) {
+      data.cityData = await generateCityDataFromResponse(data.response);
     }
 
     return data;
@@ -471,12 +488,12 @@ export const mockProcessWeatherQuery = async (query) => {
     'drought': `${location} is in day 45 of drought conditions. Water conservation measures are in effect, with restrictions on non-essential water usage.`,
     'default': `Current weather in ${location} shows normal conditions. Temperature is 22°C with moderate humidity. No extreme weather patterns detected.`
   };
-
   return {
     status: 'success',
     location: location,
     coordinates: coordinates,
     weatherPattern: weatherPattern,
-    response: responses[weatherPattern]
+    response: responses[weatherPattern],
+    cityData: await generateCityDataFromResponse(responses[weatherPattern])
   };
 };

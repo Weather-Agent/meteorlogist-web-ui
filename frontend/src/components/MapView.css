@@ -1,0 +1,13 @@
+/* City Tooltip Styles */
+.city-tooltip {
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.city-overlay {
+  pointer-events: none;
+}
+
+.ol-overlay-container {
+  pointer-events: none;
+}

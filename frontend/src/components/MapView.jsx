@@ -6,7 +6,9 @@ import OSM from 'ol/source/OSM';
 import { fromLonLat } from 'ol/proj';
 import { Button } from './ui/button';
 import WeatherEffects from './WeatherEffects';
+import CityTooltips from './CityTooltips';
 import 'ol/ol.css';
+import './MapView.css';
 
 const INDIA_CENTER = [78.9629, 22.5937];
 const INDIA_ZOOM = 5;
@@ -169,7 +171,7 @@ const extractWeatherPattern = (query = '') => {
   return 'default';
 };
 
-const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern }) => {
+const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern, cityData = [] }) => {
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
   const [weatherPattern, setWeatherPattern] = useState(propWeatherPattern || 'default');
@@ -301,11 +303,14 @@ const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern 
             ref={mapContainerRef} 
             className="absolute inset-0 rounded-lg overflow-hidden"
             data-map-container="true"
-          />
-          <WeatherEffects 
+          />          <WeatherEffects 
             key={`weather-${weatherPattern}-${mapLocation ? mapLocation.join(',') : 'default'}`}
             pattern={weatherPattern} 
             location={mapLocation} 
+          />
+          <CityTooltips 
+            map={mapRef.current} 
+            cityData={cityData}
           />
         </div>
       </div>
