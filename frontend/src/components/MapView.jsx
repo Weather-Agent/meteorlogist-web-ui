@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { Map, View } from 'ol';
+import { Map, View, Overlay } from 'ol';
 import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
 import OSM from 'ol/source/OSM';
+import VectorSource from 'ol/source/Vector';
+import { Point } from 'ol/geom';
+import { Feature } from 'ol';
+import { Style, Icon } from 'ol/style';
 import { fromLonLat } from 'ol/proj';
 import { Button } from './ui/button';
 import WeatherEffects from './WeatherEffects';
@@ -169,18 +174,109 @@ const extractWeatherPattern = (query = '') => {
   return 'default';
 };
 
-const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern }) => {
+const MapView = forwardRef(({ location, query, onClose, weatherPattern: propWeatherPattern }, ref) => {
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
+  const overlayRef = useRef(null);
+  const markerLayerRef = useRef(null);
   const [weatherPattern, setWeatherPattern] = useState(propWeatherPattern || 'default');
   const [mapLocation, setMapLocation] = useState(INDIA_CENTER);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  // City details for tooltips
+  const cityDetails = {
+    'Mumbai': { population: '12.5M', area: '603 km²', state: 'Maharashtra', climate: 'Tropical' },
+    'Delhi': { population: '11.0M', area: '1,484 km²', state: 'Delhi', climate: 'Semi-arid' },
+    'Bangalore': { population: '8.4M', area: '741 km²', state: 'Karnataka', climate: 'Tropical savanna' },
+    'Hyderabad': { population: '6.9M', area: '650 km²', state: 'Telangana', climate: 'Semi-arid' },
+    'Chennai': { population: '4.7M', area: '426 km²', state: 'Tamil Nadu', climate: 'Tropical wet' },
+    'Kolkata': { population: '4.5M', area: '185 km²', state: 'West Bengal', climate: 'Tropical wet' },
+    'Pune': { population: '3.1M', area: '331 km²', state: 'Maharashtra', climate: 'Semi-arid' },
+    'Ahmedabad': { population: '5.6M', area: '505 km²', state: 'Gujarat', climate: 'Semi-arid' }
+  };
+
+  // Method to add city marker
+  const addCityMarker = (cityName, coordinates) => {
+    if (!mapRef.current || !markerLayerRef.current) return;
+
+    // Clear existing markers
+    markerLayerRef.current.getSource().clear();
+
+    // Create marker feature
+    const marker = new Feature({
+      geometry: new Point(fromLonLat(coordinates)),
+      name: cityName,
+      details: cityDetails[cityName] || {}
+    });
+
+    // Create marker style
+    marker.setStyle(new Style({
+      image: new Icon({
+        anchor: [0.5, 1],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        src: 'data:image/svg+xml;base64,' + btoa(`
+          <svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 0C6.716 0 0 6.716 0 15c0 8.284 15 25 15 25s15-16.716 15-25C30 6.716 23.284 0 15 0z" fill="#8B5CF6"/>
+            <circle cx="15" cy="15" r="8" fill="#FFFFFF"/>
+            <circle cx="15" cy="15" r="4" fill="#8B5CF6"/>
+          </svg>
+        `),
+        scale: 1
+      })
+    }));
+
+    markerLayerRef.current.getSource().addFeature(marker);
+  };
+
+  // Method to zoom to city
+  const zoomToCity = (cityName, coordinates) => {
+    if (!mapRef.current) return;
+
+    setSelectedCity(cityName);
+    addCityMarker(cityName, coordinates);
+
+    mapRef.current.getView().animate({
+      center: fromLonLat(coordinates),
+      zoom: 10,
+      duration: 1000,
+    });
+  };
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    zoomToCity
+  }));
   
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
+    // Create marker layer
+    const markerSource = new VectorSource();
+    const markerLayer = new VectorLayer({
+      source: markerSource,
+      zIndex: 100
+    });
+    markerLayerRef.current = markerLayer;
+
+    // Create overlay for tooltip
+    const overlay = new Overlay({
+      element: overlayRef.current,
+      autoPan: {
+        animation: {
+          duration: 250,
+        },
+      },
+    });
+
     const map = new Map({
       target: mapContainerRef.current,
-      layers: [new TileLayer({ source: new OSM() })],
+      layers: [
+        new TileLayer({ source: new OSM() }),
+        markerLayer
+      ],
+      overlays: [overlay],
       view: new View({
         center: fromLonLat(INDIA_CENTER),
         zoom: INDIA_ZOOM,
@@ -188,6 +284,29 @@ const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern 
         constrainResolution: true,
       }),
       controls: [],
+    });
+
+    // Add click listener for markers
+    map.on('click', (evt) => {
+      const feature = map.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
+      if (feature) {
+        const coords = feature.getGeometry().getCoordinates();
+        const cityName = feature.get('name');
+        const details = feature.get('details');
+        
+        setSelectedCity({ name: cityName, details });
+        overlay.setPosition(coords);
+      } else {
+        setSelectedCity(null);
+        overlay.setPosition(undefined);
+      }
+    });
+
+    // Add pointer cursor on marker hover
+    map.on('pointermove', (e) => {
+      const pixel = map.getEventPixel(e.originalEvent);
+      const hit = map.hasFeatureAtPixel(pixel);
+      map.getTarget().style.cursor = hit ? 'pointer' : '';
     });
 
     mapRef.current = map;
@@ -265,8 +384,14 @@ const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern 
         duration: 1000,
       });
 
+      // Clear markers
+      if (markerLayerRef.current) {
+        markerLayerRef.current.getSource().clear();
+      }
+
       setWeatherPattern('default');
       setMapLocation(INDIA_CENTER);
+      setSelectedCity(null);
     }
   };
 
@@ -302,6 +427,40 @@ const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern 
             className="absolute inset-0 rounded-lg overflow-hidden"
             data-map-container="true"
           />
+          
+          {/* Tooltip overlay */}
+          <div
+            ref={overlayRef}
+            className={`absolute bg-slate-900/95 backdrop-blur-md border border-purple-600/50 rounded-lg p-3 shadow-lg transition-opacity pointer-events-none ${
+              selectedCity ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ transform: 'translate(-50%, -100%)', marginTop: '-10px' }}
+          >
+            {selectedCity && (
+              <div className="text-white min-w-48">
+                <h4 className="font-bold text-purple-300 text-lg mb-2">{selectedCity.name}</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Population:</span>
+                    <span className="text-white">{selectedCity.details.population}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Area:</span>
+                    <span className="text-white">{selectedCity.details.area}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">State:</span>
+                    <span className="text-white">{selectedCity.details.state}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Climate:</span>
+                    <span className="text-white">{selectedCity.details.climate}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <WeatherEffects 
             key={`weather-${weatherPattern}-${mapLocation ? mapLocation.join(',') : 'default'}`}
             pattern={weatherPattern} 
@@ -311,6 +470,8 @@ const MapView = ({ location, query, onClose, weatherPattern: propWeatherPattern 
       </div>
     </div>
   );
-};
+});
+
+MapView.displayName = 'MapView';
 
 export default MapView;

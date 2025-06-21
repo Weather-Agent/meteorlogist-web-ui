@@ -1,7 +1,67 @@
 import { MapPin, ChevronLeft } from 'lucide-react';
 import { Button } from './ui/button';
+import { LineChart } from '@mui/x-charts/LineChart';
 
 const ChartView = ({ query, onClose }) => {
+  // Dummy weather data for demonstration
+  const temperatureData = {
+    xAxis: [{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] }],
+    series: [
+      {
+        data: [5, 8, 12, 18, 23, 28, 32, 30, 25, 18, 10, 6],
+        label: 'Temperature (°C)',
+        area: true,
+        color: '#8B5CF6'
+      }
+    ]
+  };
+
+  const precipitationData = {
+    xAxis: [{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] }],
+    series: [
+      {
+        data: [45, 38, 42, 55, 68, 85, 95, 88, 75, 62, 50, 47],
+        label: 'Precipitation (mm)',
+        color: '#06B6D4'
+      }
+    ]
+  };
+
+  const windSpeedData = {
+    xAxis: [{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] }],
+    series: [
+      {
+        data: [12, 15, 18, 22, 19, 16, 14, 17, 20, 25, 18, 13],
+        label: 'Wind Speed (km/h)',
+        curve: 'catmullRom',
+        color: '#10B981'
+      }
+    ]
+  };
+
+  const multiSeriesData = {
+    xAxis: [{ 
+      data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      label: 'Month'
+    }],
+    series: [
+      {
+        data: [5, 8, 12, 18, 23, 28, 32, 30, 25, 18, 10, 6],
+        label: 'Temperature (°C)',
+        color: '#8B5CF6'
+      },
+      {
+        data: [2, 4, 6, 9, 12, 15, 17, 16, 13, 9, 5, 3],
+        label: 'Humidity (%/10)',
+        color: '#F59E0B'
+      },
+      {
+        data: [8, 10, 12, 15, 13, 11, 9, 11, 13, 16, 12, 9],
+        label: 'Wind Speed (km/h)',
+        color: '#10B981'
+      }
+    ]
+  };
   return (
     <div className="flex flex-col h-full w-full p-2 md:p-4">
       <div className="flex flex-col h-full w-full bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-md rounded-lg shadow-lg border border-slate-700/50 overflow-hidden">
@@ -33,22 +93,141 @@ const ChartView = ({ query, onClose }) => {
           </div>
         </div>
         
-        <div className="relative flex-1 m-3 md:m-4 overflow-hidden rounded-lg border border-slate-700/30 flex items-center justify-center bg-gradient-to-br from-slate-800/50 to-purple-900/30">
-          <div className="text-center px-4 max-w-xl mx-auto">
-            <div className="bg-purple-500/20 p-6 rounded-lg border border-purple-600/30 backdrop-blur-sm mb-6">
-              <h3 className="text-xl text-purple-200 font-medium mb-3">Weather Data Visualization</h3>
-              <p className="text-slate-300">
-                Interactive climate data graphs and trend analysis will be displayed here, showing:
-              </p>
-              <ul className="mt-3 space-y-2 text-slate-400">
-                <li>• Temperature variations and forecasts</li>
-                <li>• Precipitation patterns and predictions</li>
-                <li>• Wind speed and direction trends</li>
-                <li>• Historical weather data comparisons</li>
-              </ul>
-            </div>
-            <div className="text-sm text-purple-400/70 bg-purple-500/10 px-4 py-2 rounded-full inline-block">
-              🚀 Coming soon: Advanced weather analytics and insights
+        <div className="relative flex-1 m-3 md:m-4 overflow-hidden rounded-lg border border-slate-700/30 bg-gradient-to-br from-slate-800/50 to-purple-900/30">
+          <div className="p-4 h-full overflow-y-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+              {/* Temperature Chart */}
+              <div className="bg-slate-800/60 p-4 rounded-lg border border-purple-600/30 backdrop-blur-sm">
+                <h3 className="text-lg text-purple-200 font-medium mb-3">Monthly Temperature Trends</h3>
+                <div className="h-80">
+                  <LineChart
+                    {...temperatureData}
+                    height={300}
+                    grid={{ vertical: true, horizontal: true }}
+                    margin={{ left: 60, right: 20, top: 20, bottom: 60 }}
+                    sx={{
+                      '& .MuiChartsAxis-root': {
+                        '& .MuiChartsAxis-tickLabel': {
+                          fill: '#E5E7EB'
+                        },
+                        '& .MuiChartsAxis-line': {
+                          stroke: '#6B7280'
+                        },
+                        '& .MuiChartsAxis-tick': {
+                          stroke: '#6B7280'
+                        }
+                      },
+                      '& .MuiChartsGrid-root': {
+                        '& .MuiChartsGrid-line': {
+                          stroke: '#374151',
+                          strokeOpacity: 0.3
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Precipitation Chart */}
+              <div className="bg-slate-800/60 p-4 rounded-lg border border-cyan-600/30 backdrop-blur-sm">
+                <h3 className="text-lg text-cyan-200 font-medium mb-3">Monthly Precipitation</h3>
+                <div className="h-80">
+                  <LineChart
+                    {...precipitationData}
+                    height={300}
+                    grid={{ vertical: true, horizontal: true }}
+                    margin={{ left: 60, right: 20, top: 20, bottom: 60 }}
+                    sx={{
+                      '& .MuiChartsAxis-root': {
+                        '& .MuiChartsAxis-tickLabel': {
+                          fill: '#E5E7EB'
+                        },
+                        '& .MuiChartsAxis-line': {
+                          stroke: '#6B7280'
+                        },
+                        '& .MuiChartsAxis-tick': {
+                          stroke: '#6B7280'
+                        }
+                      },
+                      '& .MuiChartsGrid-root': {
+                        '& .MuiChartsGrid-line': {
+                          stroke: '#374151',
+                          strokeOpacity: 0.3
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Wind Speed Chart */}
+              <div className="bg-slate-800/60 p-4 rounded-lg border border-emerald-600/30 backdrop-blur-sm">
+                <h3 className="text-lg text-emerald-200 font-medium mb-3">Wind Speed Patterns</h3>
+                <div className="h-80">
+                  <LineChart
+                    {...windSpeedData}
+                    height={300}
+                    grid={{ vertical: true, horizontal: true }}
+                    margin={{ left: 60, right: 20, top: 20, bottom: 60 }}
+                    sx={{
+                      '& .MuiChartsAxis-root': {
+                        '& .MuiChartsAxis-tickLabel': {
+                          fill: '#E5E7EB'
+                        },
+                        '& .MuiChartsAxis-line': {
+                          stroke: '#6B7280'
+                        },
+                        '& .MuiChartsAxis-tick': {
+                          stroke: '#6B7280'
+                        }
+                      },
+                      '& .MuiChartsGrid-root': {
+                        '& .MuiChartsGrid-line': {
+                          stroke: '#374151',
+                          strokeOpacity: 0.3
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Multi-series Chart */}
+              <div className="bg-slate-800/60 p-4 rounded-lg border border-amber-600/30 backdrop-blur-sm">
+                <h3 className="text-lg text-amber-200 font-medium mb-3">Weather Overview</h3>
+                <div className="h-80">
+                  <LineChart
+                    {...multiSeriesData}
+                    height={300}
+                    grid={{ vertical: true, horizontal: true }}
+                    margin={{ left: 60, right: 20, top: 20, bottom: 60 }}
+                    sx={{
+                      '& .MuiChartsAxis-root': {
+                        '& .MuiChartsAxis-tickLabel': {
+                          fill: '#E5E7EB'
+                        },
+                        '& .MuiChartsAxis-line': {
+                          stroke: '#6B7280'
+                        },
+                        '& .MuiChartsAxis-tick': {
+                          stroke: '#6B7280'
+                        }
+                      },
+                      '& .MuiChartsGrid-root': {
+                        '& .MuiChartsGrid-line': {
+                          stroke: '#374151',
+                          strokeOpacity: 0.3
+                        }
+                      },
+                      '& .MuiChartsLegend-root': {
+                        '& .MuiChartsLegend-label': {
+                          fill: '#E5E7EB'
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -2,20 +2,29 @@ import { useState, useEffect, useRef } from 'react';
 import Chatbot from './components/Chatbot';
 import MapView from './components/MapView';
 import ChartView from './components/ChartView';
+import ChartPanel from './components/ChartPanel';
 import { cn } from './lib/utils';
 import { useAuth } from './contexts/AuthContext';
 
 function AppContent() {
   const { isAuthenticated, loading, signIn } = useAuth();  
   const [showMap, setShowMap] = useState(false);
-  const [activeView, setActiveView] = useState('map');
   const [weatherQuery, setWeatherQuery] = useState(null);
   const [weatherLocation, setWeatherLocation] = useState(null);
   const [mapWidthPercent, setMapWidthPercent] = useState(66);
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef(null);
+  const mapRef = useRef(null);
   const draggingRef = useRef(false);
+
+  // Handle city click from chart panel
+  const handleCityClick = (cityName, coordinates) => {
+    if (mapRef.current && mapRef.current.zoomToCity) {
+      mapRef.current.zoomToCity(cityName, coordinates);
+    }
+    setShowMap(true);
+  };
 
   useEffect(() => {
     const onResize = () => setViewportWidth(window.innerWidth);
@@ -89,17 +98,11 @@ function AppContent() {
     }
   };
 
-  const handleCloseMap = (switchToView = null) => {
-    if (switchToView) {
-      setActiveView(switchToView);
-      setShowMap(true);
-    } else {
-      setShowMap(false);
-    }
+  const handleCloseMap = () => {
+    setShowMap(false);
   };
   
-  const handleOpenView = (viewType = 'map') => {
-    setActiveView(viewType);
+  const handleOpenView = () => {
     setShowMap(true);
   };
 
@@ -157,7 +160,7 @@ function AppContent() {
   return (
     <div
       ref={containerRef}
-      className="bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden"
+      className="bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden relative"
       style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}
     >
       {!isAuthenticated && (
@@ -172,7 +175,7 @@ function AppContent() {
       )}
       <div
         className={cn(
-          'overflow-hidden flex flex-col',
+          'overflow-hidden flex flex-col relative',
           !showMap && 'pointer-events-none'
         )}
         style={{
@@ -193,19 +196,20 @@ function AppContent() {
           zIndex: 20,
         }}
       >
-        {activeView === 'map' ? (
-          <MapView 
-            location={weatherLocation} 
-            query={weatherQuery} 
-            onClose={handleCloseMap} 
-            weatherPattern={weatherPattern} 
-          />
-        ) : (
-          <ChartView
-            query={weatherQuery}
-            onClose={handleCloseMap}
-          />
-        )}
+        <div className="w-full h-full relative">
+          <div className="absolute inset-0 overflow-hidden">
+            <MapView 
+              ref={mapRef}
+              location={weatherLocation} 
+              query={weatherQuery} 
+              onClose={handleCloseMap} 
+              weatherPattern={weatherPattern} 
+            />
+            
+            {/* Chart Panel - Only within map area */}
+            {showMap && <ChartPanel onCityClick={handleCityClick} />}
+          </div>
+        </div>
       </div>
       {showMap && !isMobile && (
         <div
@@ -237,6 +241,8 @@ function AppContent() {
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
+          isolation: 'isolate', // Create a new stacking context
+          position: 'relative' // Establish positioning context
         }}
       >
         {isAuthenticated ? (
@@ -245,7 +251,6 @@ function AppContent() {
             showMapButton={true}
             showMap={showMap}
             onMapOpen={handleOpenView}
-            activeView={activeView}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center px-4">
