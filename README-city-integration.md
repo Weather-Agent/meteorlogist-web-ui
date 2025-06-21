@@ -5,18 +5,22 @@ This project now integrates with Google's Gemini AI API to automatically extract
 ## Setup
 
 1. **Get a Gemini API Key**
+
    - Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
    - Create a new API key
    - Copy the API key
 
 2. **Configure Environment Variables**
+
    - Copy `.env.example` to `.env`
    - Replace `your_gemini_api_key_here` with your actual Gemini API key:
+
    ```
    VITE_GEMINI_API_KEY=your_actual_gemini_api_key_here
    ```
 
 3. **Install Dependencies**
+
    ```bash
    npm install
    ```
@@ -29,9 +33,10 @@ This project now integrates with Google's Gemini AI API to automatically extract
 ## Features
 
 ### City Data Extraction
+
 - Automatically extracts cities mentioned in weather responses
 - Uses Gemini AI to generate structured city data including:
-  - Coordinates (latitude/longitude)
+  - Coordinates (latitude/longitude) - **dynamically generated, no static coordinates**
   - Population
   - Area
   - State/Province
@@ -40,13 +45,31 @@ This project now integrates with Google's Gemini AI API to automatically extract
   - Appropriate weather icons
 
 ### Map Integration
-- Displays cities on the interactive map
-- Shows weather icons at city locations
-- Interactive tooltips with detailed city information
-- Automatic map centering based on query location
+
+- Displays cities on the interactive map with weather icon pins
+- Shows persistent tooltips with detailed city information including coordinates
+- Automatic map centering based on Gemini-generated coordinates
+- Dynamic zoom levels based on city population (8-11 zoom levels)
+- No dependency on static coordinate dictionaries
+- Seamless integration with weather effects overlay
+
+### Interactive City Pins
+
+- Weather emoji icons for visual representation
+- Persistent tooltips showing:
+  - City name and current weather conditions
+  - Population (formatted with commas)
+  - Area coverage in km²
+  - State/Province information
+  - Climate classification
+  - Precise coordinates (lat, lon)
+- Smooth animations and professional styling
+- Always visible tooltips for better UX
 
 ### Data Structure
+
 The system generates city data in the following format:
+
 ```json
 [
   {
@@ -66,15 +89,18 @@ The system generates city data in the following format:
 ## Architecture
 
 ### Components
+
 - **MapView.jsx**: Main map component with OpenLayers integration
 - **CityTooltips.jsx**: Handles city markers and tooltips on the map
 - **WeatherEffects.jsx**: Displays weather-related visual effects
 
 ### Services
+
 - **geminiService.js**: Integrates with Google Gemini AI API
 - **weatherApi.js**: Handles weather API communication and data processing
 
 ### Workflow
+
 1. User submits a weather query
 2. Weather API processes the query and returns a response
 3. Gemini AI analyzes the response and extracts city information
@@ -82,6 +108,7 @@ The system generates city data in the following format:
 5. Map displays cities with appropriate icons and tooltips
 
 ## Supported Weather Icons
+
 - `weather-sunny`: ☀️
 - `weather-cloudy`: ☁️
 - `weather-rainy`: 🌧️
@@ -93,6 +120,7 @@ The system generates city data in the following format:
 - `weather-cold`: 🥶
 
 ## Error Handling
+
 - Graceful fallback when Gemini API is unavailable
 - Validates JSON responses from AI
 - Handles missing or invalid city data

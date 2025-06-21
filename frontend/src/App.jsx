@@ -22,10 +22,10 @@ function AppContent() {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
-  
-  const [weatherPattern, setWeatherPattern] = useState(null);
+    const [weatherPattern, setWeatherPattern] = useState(null);
   const [weatherCoordinates, setWeatherCoordinates] = useState(null);
   const [weatherResponse, setWeatherResponse] = useState(null);
+  const [cityData, setCityData] = useState([]);
   
   const handleChatSubmit = (query, responseData = null) => {
     setWeatherQuery(query);
@@ -54,9 +54,9 @@ function AppContent() {
         } else if (responseData.weatherPattern) {
           setWeatherPattern(responseData.weatherPattern);
         }
-      }
-      if (responseData.location) setWeatherLocation(responseData.location);
+      }      if (responseData.location) setWeatherLocation(responseData.location);
       if (responseData.coordinates) setWeatherCoordinates(responseData.coordinates);
+      if (responseData.cityData) setCityData(responseData.cityData);
       setShowMap(true);
       return;
     }
@@ -192,13 +192,13 @@ function AppContent() {
           backgroundColor: 'inherit',
           zIndex: 20,
         }}
-      >
-        {activeView === 'map' ? (
+      >        {activeView === 'map' ? (
           <MapView 
             location={weatherLocation} 
             query={weatherQuery} 
             onClose={handleCloseMap} 
             weatherPattern={weatherPattern} 
+            cityData={cityData}
           />
         ) : (
           <ChartView

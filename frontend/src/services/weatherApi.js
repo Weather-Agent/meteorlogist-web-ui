@@ -133,13 +133,12 @@ export const sendMessageToSession = async (message) => {
 
         if (finalResponse) {
           const cityData = await generateCityDataFromResponse(finalResponse.content.parts[0].text);
-          
+
           return {
             status: 'success',
             response: finalResponse.content.parts[0].text,
             weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
             location: extractLocation(message),
-            coordinates: getCoordinatesForLocation(extractLocation(message)),
             cityData: cityData
           };
         }
@@ -165,13 +164,12 @@ export const sendMessageToSession = async (message) => {
 
     if (finalResponse) {
       const cityData = await generateCityDataFromResponse(finalResponse.content.parts[0].text);
-      
+
       return {
         status: 'success',
         response: finalResponse.content.parts[0].text,
         weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
         location: extractLocation(message),
-        coordinates: getCoordinatesForLocation(extractLocation(message)),
         cityData: cityData
       };
     }
@@ -188,8 +186,7 @@ export const sendMessageToSession = async (message) => {
       status: 'error',
       response: `Error connecting to weather service: ${error.message}. Please try again later.`,
       weatherPattern: 'default',
-      location: extractLocation(message),
-      coordinates: getCoordinatesForLocation(extractLocation(message))
+      location: extractLocation(message)
     };
   }
 };
@@ -282,25 +279,7 @@ const extractLocation = (message) => {
       return match[1] ? match[1].trim() : match[0].trim();
     }
   }
-  return 'Mumbai';
-};
-
-const getCoordinatesForLocation = (location) => {
-  const cityCoordinates = {
-    'mumbai': [72.8777, 19.0760],
-    'delhi': [77.1025, 28.7041],
-    'bangalore': [77.5946, 12.9716],
-    'hyderabad': [78.4867, 17.3850],
-    'chennai': [80.2707, 13.0827],
-    'kolkata': [88.3639, 22.5726],
-    'london': [-0.1278, 51.5074],
-    'new york': [-74.0060, 40.7128],
-    'tokyo': [139.6503, 35.6762],
-    'sydney': [151.2093, -33.8688],
-    'paris': [2.3522, 48.8566]
-  };
-
-  return cityCoordinates[location?.toLowerCase()] || cityCoordinates['mumbai'];
+  return null; // Return null instead of default city
 };
 
 export const getCurrentWeather = async (location) => {
@@ -371,7 +350,9 @@ export const processWeatherQuery = async (query) => {
     if (!response.ok) {
       console.error(`Backend API error: ${response.status}`);
       throw new Error(`Weather API error: ${response.status}`);
-    }    const data = await response.json();
+    }
+
+    const data = await response.json();
     console.log('Response from backend:', data);
 
     if (data.weatherPattern) {
@@ -430,22 +411,6 @@ export const mockProcessWeatherQuery = async (query) => {
 
   location = location || 'Mumbai';
 
-  const cityCoordinates = {
-    'mumbai': [72.8777, 19.0760],
-    'delhi': [77.1025, 28.7041],
-    'bangalore': [77.5946, 12.9716],
-    'hyderabad': [78.4867, 17.3850],
-    'chennai': [80.2707, 13.0827],
-    'kolkata': [88.3639, 22.5726],
-    'london': [-0.1278, 51.5074],
-    'new york': [-74.0060, 40.7128],
-    'tokyo': [139.6503, 35.6762],
-    'sydney': [151.2093, -33.8688],
-    'paris': [2.3522, 48.8566]
-  };
-
-  const coordinates = cityCoordinates[location.toLowerCase()] || cityCoordinates['mumbai'];
-
   let weatherPattern = 'default';
   const weatherPatterns = {
     'rain': /\b(rain|rainy|rainfall|raining|precipit|shower|downpour|drizzl)\b/i,
@@ -488,10 +453,10 @@ export const mockProcessWeatherQuery = async (query) => {
     'drought': `${location} is in day 45 of drought conditions. Water conservation measures are in effect, with restrictions on non-essential water usage.`,
     'default': `Current weather in ${location} shows normal conditions. Temperature is 22°C with moderate humidity. No extreme weather patterns detected.`
   };
+
   return {
     status: 'success',
     location: location,
-    coordinates: coordinates,
     weatherPattern: weatherPattern,
     response: responses[weatherPattern],
     cityData: await generateCityDataFromResponse(responses[weatherPattern])

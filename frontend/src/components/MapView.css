@@ -1,13 +1,37 @@
 /* City Tooltip Styles */
-.city-tooltip {
+.city-tooltip-content {
   pointer-events: none;
   z-index: 1000;
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
 }
 
 .city-overlay {
   pointer-events: none;
+  z-index: 1000;
 }
 
 .ol-overlay-container {
   pointer-events: none;
+}
+
+/* Improve tooltip appearance */
+.city-tooltip-content > div {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.2s ease-in-out;
+}
+
+/* Animation for tooltips */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.city-tooltip-content {
+  animation: fadeInUp 0.3s ease-out;
 }
