@@ -7,10 +7,19 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
+
+# Local environment
 *.local
+.env
+
+# Package manager lock files
+package-lock.json
 
 # Editor directories and files
 .vscode/*
