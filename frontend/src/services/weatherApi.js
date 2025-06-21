@@ -1,6 +1,7 @@
 import { getAuthToken } from './authService';
 
-const BASE_URL = 'http://localhost:8000';
+// Use proxy path for development to avoid CORS issues
+const BASE_URL = import.meta.env.DEV ? '/api' : 'http://127.0.0.1:8000/apps';
 const APP_NAME = 'weatheragent';
 
 // Session management
@@ -19,7 +20,9 @@ export const createSession = async () => {
       currentUserId = generateUserId();
     }
 
-    const response = await fetch(`${BASE_URL}/apps/${APP_NAME}/users/${currentUserId}/sessions`, {
+    console.log('Creating session for user:', currentUserId);
+
+    const response = await fetch(`${BASE_URL}/${APP_NAME}/users/${currentUserId}/sessions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,7 +34,9 @@ export const createSession = async () => {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to create session: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`Failed to create session: ${response.status} - ${errorText}`);
+      throw new Error(`Failed to create session: ${response.status} - ${errorText}`);
     }
 
     const sessionData = await response.json();
@@ -44,30 +49,40 @@ export const createSession = async () => {
   }
 };
 
+// Function to create a new session (reset current session)
+export const createNewSession = async () => {
+  currentSessionId = null; // Reset current session
+  return await createSession();
+};
+
 export const sendMessageToSession = async (message) => {
   try {
     if (!currentSessionId) {
       await createSession();
     }
 
-    const response = await fetch(`${BASE_URL}/apps/${APP_NAME}/users/${currentUserId}/sessions/${currentSessionId}`, {
+    const payload = {
+      new_message: {
+        role: "user",
+        parts: [{ "text": message }]
+      }
+    };
+
+    console.log('Sending message to session:', currentSessionId);
+    console.log('Payload:', JSON.stringify(payload, null, 2));
+
+    const response = await fetch(`${BASE_URL}/${APP_NAME}/users/${currentUserId}/sessions/${currentSessionId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json'
       },
-      body: JSON.stringify({
-        app_name: APP_NAME,
-        user_id: currentUserId,
-        session_id: currentSessionId,
-        new_message: {
-          role: "user",
-          parts: [{ "text": message }]
-        }
-      })
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Failed to send message: ${response.status} - ${errorText}`);
       throw new Error(`Failed to send message: ${response.status}`);
     }
 

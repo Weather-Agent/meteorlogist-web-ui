@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Send, MapPin, Plus } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { sendMessageToSession, createSession } from "../services/weatherApi";
+import { sendMessageToSession, createNewSession } from "../services/weatherApi";
 
 const INDIAN_CITIES = [
   "Mumbai",
@@ -81,10 +81,9 @@ const Chatbot = ({
     }
     setShowUserMenu(false);
   };
-
   const handleNewSession = async () => {
     try {
-      await createSession();
+      await createNewSession();
       setMessages([
         {
           role: "system",
