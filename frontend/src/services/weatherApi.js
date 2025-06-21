@@ -119,12 +119,10 @@ export const sendMessageToSession = async (message) => {
           const retryErrorText = await retryResponse.text();
           throw new Error(`Failed to send message after retry: ${retryResponse.status} - ${retryErrorText}`);
         }
-        const retryEvents = await retryResponse.json();
-
-        // Process the retry events the same way as normal events
+        const retryEvents = await retryResponse.json();        // Process the retry events the same way as normal events
         const finalResponse = retryEvents
-          .filter(event => event.author === 'meterologist' &&
-            event.content?.parts?.[0]?.text)
+          .filter(event => event.content?.parts?.[0]?.text &&
+            event.content.parts[0].text.trim().length > 0)
           .pop();
 
         if (finalResponse) {
@@ -145,13 +143,13 @@ export const sendMessageToSession = async (message) => {
       }
 
       throw new Error(`Failed to send message: ${response.status} - ${errorText}`);
-    } const events = await response.json();
+    }    const events = await response.json();
     console.log('Received events:', events);
 
-    // Find the final response from the meteorologist
+    // Find the final response from any agent with text content
     const finalResponse = events
-      .filter(event => event.author === 'meterologist' &&
-        event.content?.parts?.[0]?.text)
+      .filter(event => event.content?.parts?.[0]?.text && 
+        event.content.parts[0].text.trim().length > 0)
       .pop();
 
     if (finalResponse) {
