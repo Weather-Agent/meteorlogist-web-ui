@@ -9,16 +9,10 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <CivicAuthProvider
-      clientId={civicClientId}
-      onSignIn={(error) => {
-        if (!error) {
-          console.log('Successfully signed in with Civic');
-        } else {
-          console.error('Error signing in with Civic:', error);
-        }
-      }}
-      onSignOut={() => {
-        console.log('Signed out from Civic');
+      clientId={civicClientId}      onSignIn={(error) => {
+        // Handle sign in result
+      }}      onSignOut={() => {
+        // Handle sign out
       }}
     >
       <InnerAuthProvider>

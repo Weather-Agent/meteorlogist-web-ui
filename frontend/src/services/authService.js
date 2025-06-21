@@ -16,9 +16,7 @@ const initAuth = () => {
       validateToken(savedToken).catch(() => {
         logout();
       });
-    }
-  } catch (e) {
-    console.error('Error loading auth state:', e);
+    }  } catch (e) {
     localStorage.removeItem('auth_user');
     localStorage.removeItem('auth_token');
   }
@@ -27,11 +25,10 @@ const initAuth = () => {
 initAuth();
 
 const notifyListeners = () => {
-  authListeners.forEach(listener => {
-    try {
+  authListeners.forEach(listener => {    try {
       listener(currentUser);
     } catch (e) {
-      console.error('Error in auth listener:', e);
+      // Error in auth listener
     }
   });
 };
@@ -52,7 +49,6 @@ const persistAuth = (user, token) => {
 
 const validateToken = async (token) => {
   try {
-    console.log(`Validating token: ${token.substring(0, 10)}...`);
     
     const response = await fetch(`${API_URL}/auth/validate`, {
       method: 'POST',
@@ -61,22 +57,18 @@ const validateToken = async (token) => {
       },
       body: JSON.stringify({ token })
     });
-    
-    if (!response.ok) {
-      console.warn(`Token validation failed with status: ${response.status}`);
+      if (!response.ok) {
       throw new Error('Invalid token');
     }
     
     const data = await response.json();
-    console.log(`Token validation result: ${data.valid ? 'valid' : 'invalid'}`);
     
     if (data.valid && data.user) {
       currentUser = data.user;
     }
     
-    return data.valid;
-  } catch (e) {
-    console.error('Error validating token:', e);
+    return data.valid;  } catch (e) {
+    // Error validating token
     
     if (e.message.includes("Failed to fetch") || e.message.includes("NetworkError")) {
       console.warn("Network error during token validation, maintaining session temporarily");

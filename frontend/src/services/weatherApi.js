@@ -43,63 +43,38 @@ export const processWeatherQuery = async (query) => {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
-    console.log('Sending query to backend:', query);
-    
-    const emergencyKeywords = {
+      const emergencyKeywords = {
       'fire': /fire|wildfire|forest fire|bushfire|flames|burning/i,
       'earthquake': /earthquake|seismic|tremor|quake/i,
       'flood': /flood|flooding|submerged|inundated/i,
       'tsunami': /tsunami|tidal wave|seismic sea wave/i,
       'hurricane': /hurricane|cyclone|typhoon|tropical storm/i,
       'drought': /drought|dry|arid|water scarcity/i
-    };
-    
-    for (const [pattern, regex] of Object.entries(emergencyKeywords)) {
-      if (regex.test(query)) {
-        console.log(`EMERGENCY pattern detected: ${pattern}`);
-      }
-    }
-    
-    const response = await fetch(`${BASE_URL}/weather/query`, {
+    };    const response = await fetch(`${BASE_URL}/weather/query`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ query })
     });
     
-    if (!response.ok) {
-      console.error(`Backend API error: ${response.status}`);
-      throw new Error(`Weather API error: ${response.status}`);
+    if (!response.ok) {      throw new Error(`Weather API error: ${response.status}`);
     }
-    
-    const data = await response.json();
-    console.log('Response from backend:', data);
+      const data = await response.json();
     
     if (data.weatherPattern) {
-      console.log(`Weather pattern from backend: ${data.weatherPattern}`);
-      
-      for (const [pattern, regex] of Object.entries(emergencyKeywords)) {
+        for (const [pattern, regex] of Object.entries(emergencyKeywords)) {
         if (regex.test(query)) {
-          console.log(`Emergency pattern detected in query but backend returned: ${data.weatherPattern}`);
           if (emergencyKeywords.hasOwnProperty(pattern) && emergencyKeywords[pattern].test(query)) {
-            console.log(`Overriding backend pattern with emergency pattern: ${pattern}`);
             data.weatherPattern = pattern;
             break;
           }
         }
       }
     }
-    
-    const emergencyPatterns = ['fire', 'earthquake', 'flood', 'tsunami', 'hurricane'];
-    if (data.weatherPattern && emergencyPatterns.includes(data.weatherPattern)) {
-      console.log(`IMPORTANT: Emergency pattern detected: ${data.weatherPattern}`);
-    }
+      const emergencyPatterns = ['fire', 'earthquake', 'flood', 'tsunami', 'hurricane'];
     
     return data;
-    
-  } catch (error) {
-    console.error('Failed to process weather query:', error);
-    console.log('Falling back to mock API');
+      } catch (error) {
+    // Failed to process weather query, falling back
     return mockProcessWeatherQuery(query);
   }
 };

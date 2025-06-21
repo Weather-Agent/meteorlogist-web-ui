@@ -102,10 +102,8 @@
                 }
                 
                 const data = await response.json();
-                
-                // Format and display the result
+                  // Format and display the result
                 resultContainer.textContent = JSON.stringify(data, null, 2);
-                console.log('API Response:', data);
                 
                 // Display a special note for emergency patterns
                 if (data.weatherPattern && ['fire', 'earthquake', 'flood', 'tsunami', 'hurricane'].includes(data.weatherPattern)) {
