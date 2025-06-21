@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        input, select {
+            padding: 8px;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather API Test</h1>
+        
+        <div>
+            <label for="queryInput">Query:</label>
+            <input type="text" id="queryInput" placeholder="Enter a weather query" value="Is there a fire in Mumbai?">
+        </div>
+        
+        <button id="submitBtn">Submit Query</button>
+        <button id="emergencyBtn">Test Emergency (Fire)</button>
+        <button id="earthquakeBtn">Test Emergency (Earthquake)</button>
+        
+        <div class="result" id="resultContainer">Results will appear here...</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/weather/query';
+        
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            const query = document.getElementById('queryInput').value;
+            testWeatherAPI(query);
+        });
+        
+        document.getElementById('emergencyBtn').addEventListener('click', () => {
+            document.getElementById('queryInput').value = "Is there a major forest fire in Delhi right now?";
+            testWeatherAPI("Is there a major forest fire in Delhi right now?");
+        });
+        
+        document.getElementById('earthquakeBtn').addEventListener('click', () => {
+            document.getElementById('queryInput').value = "Was there an earthquake in Mumbai recently?";
+            testWeatherAPI("Was there an earthquake in Mumbai recently?");
+        });
+        
+        async function testWeatherAPI(query) {
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.textContent = "Loading...";
+            resultContainer.classList.remove('error');
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Format and display the result
+                resultContainer.textContent = JSON.stringify(data, null, 2);
+                console.log('API Response:', data);
+                
+                // Display a special note for emergency patterns
+                if (data.weatherPattern && ['fire', 'earthquake', 'flood', 'tsunami', 'hurricane'].includes(data.weatherPattern)) {
+                    resultContainer.innerHTML += `\n\n⚠️ EMERGENCY WEATHER PATTERN DETECTED: ${data.weatherPattern.toUpperCase()} ⚠️`;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultContainer.textContent = `Error: ${error.message}`;
+                resultContainer.classList.add('error');
+            }
+        }
+    </script>
+</body>
+</html>
