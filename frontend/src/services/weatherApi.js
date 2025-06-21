@@ -1,6 +1,166 @@
 import { getAuthToken } from './authService';
 
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'http://localhost:8000';
+const APP_NAME = 'weatheragent';
+
+// Session management
+let currentSessionId = null;
+let currentUserId = null;
+
+const generateUserId = () => {
+  const timestamp = Date.now().toString(36);
+  const randomStr = Math.random().toString(36).substring(2, 8);
+  return `user_${timestamp}_${randomStr}`;
+};
+
+export const createSession = async () => {
+  try {
+    if (!currentUserId) {
+      currentUserId = generateUserId();
+    }
+
+    const response = await fetch(`${BASE_URL}/apps/${APP_NAME}/users/${currentUserId}/sessions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      },
+      body: JSON.stringify({
+        state: {}
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create session: ${response.status}`);
+    }
+
+    const sessionData = await response.json();
+    currentSessionId = sessionData.id;
+    console.log('Created new session:', currentSessionId);
+    return sessionData;
+  } catch (error) {
+    console.error('Error creating session:', error);
+    throw error;
+  }
+};
+
+export const sendMessageToSession = async (message) => {
+  try {
+    if (!currentSessionId) {
+      await createSession();
+    }
+
+    const response = await fetch(`${BASE_URL}/apps/${APP_NAME}/users/${currentUserId}/sessions/${currentSessionId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      },
+      body: JSON.stringify({
+        app_name: APP_NAME,
+        user_id: currentUserId,
+        session_id: currentSessionId,
+        new_message: {
+          role: "user",
+          parts: [{ "text": message }]
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to send message: ${response.status}`);
+    }
+
+    const events = await response.json();
+    console.log('Received events:', events);
+
+    // Find the final response from the meteorologist
+    const finalResponse = events
+      .filter(event => event.author === 'meterologist' &&
+        event.content?.parts?.[0]?.text)
+      .pop();
+
+    if (finalResponse) {
+      return {
+        status: 'success',
+        response: finalResponse.content.parts[0].text,
+        weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
+        location: extractLocation(message),
+        coordinates: getCoordinatesForLocation(extractLocation(message))
+      };
+    }
+
+    return {
+      status: 'error',
+      response: 'No response received from meteorologist',
+      weatherPattern: 'default'
+    };
+  } catch (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
+};
+
+const extractWeatherPattern = (text) => {
+  const patterns = {
+    'thunderstorm': /thunder|lightning|storm/i,
+    'rain': /rain|rainfall|precipitation/i,
+    'snow': /snow|snowfall/i,
+    'sunny': /sunny|clear|sunshine/i,
+    'cloudy': /cloud|overcast/i,
+    'wind': /wind|windy|breeze/i,
+    'fog': /fog|mist/i,
+    'flood': /flood|flooding/i,
+    'fire': /fire|wildfire/i,
+    'earthquake': /earthquake|seismic/i,
+    'tsunami': /tsunami/i,
+    'hurricane': /hurricane|cyclone/i,
+    'drought': /drought/i
+  };
+
+  for (const [pattern, regex] of Object.entries(patterns)) {
+    if (regex.test(text)) {
+      return pattern;
+    }
+  }
+  return 'default';
+};
+
+const extractLocation = (message) => {
+  const locationPatterns = [
+    /\bin\s+([a-zA-Z\s,]+)(?:\s|$)/i,
+    /\bnear\s+([a-zA-Z\s,]+)(?:\s|$)/i,
+    /\bat\s+([a-zA-Z\s,]+)(?:\s|$)/i,
+    /\bfor\s+([a-zA-Z\s,]+)(?:\s|$)/i,
+    /\b(kolkata|mumbai|delhi|bangalore|hyderabad|chennai|london|new york|tokyo|sydney|paris)(?:\s|$)/i
+  ];
+
+  for (const pattern of locationPatterns) {
+    const match = message.match(pattern);
+    if (match) {
+      return match[1] ? match[1].trim() : match[0].trim();
+    }
+  }
+  return 'Mumbai';
+};
+
+const getCoordinatesForLocation = (location) => {
+  const cityCoordinates = {
+    'mumbai': [72.8777, 19.0760],
+    'delhi': [77.1025, 28.7041],
+    'bangalore': [77.5946, 12.9716],
+    'hyderabad': [78.4867, 17.3850],
+    'chennai': [80.2707, 13.0827],
+    'kolkata': [88.3639, 22.5726],
+    'london': [-0.1278, 51.5074],
+    'new york': [-74.0060, 40.7128],
+    'tokyo': [139.6503, 35.6762],
+    'sydney': [151.2093, -33.8688],
+    'paris': [2.3522, 48.8566]
+  };
+
+  return cityCoordinates[location?.toLowerCase()] || cityCoordinates['mumbai'];
+};
 
 export const getCurrentWeather = async (location) => {
   try {
@@ -8,20 +168,20 @@ export const getCurrentWeather = async (location) => {
     const headers = {
       'Content-Type': 'application/json',
     };
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     const response = await fetch(
-      `${BASE_URL}/weather/current?location=${encodeURIComponent(location)}`,
+      `${BASE_URL}/api/weather/current?location=${encodeURIComponent(location)}`,
       { headers }
     );
-    
+
     if (!response.ok) {
       throw new Error(`Weather API error: ${response.status}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Failed to fetch current weather:', error);
@@ -39,13 +199,13 @@ export const processWeatherQuery = async (query) => {
     const headers = {
       'Content-Type': 'application/json',
     };
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     console.log('Sending query to backend:', query);
-    
+
     const emergencyKeywords = {
       'fire': /fire|wildfire|forest fire|bushfire|flames|burning/i,
       'earthquake': /earthquake|seismic|tremor|quake/i,
@@ -54,30 +214,30 @@ export const processWeatherQuery = async (query) => {
       'hurricane': /hurricane|cyclone|typhoon|tropical storm/i,
       'drought': /drought|dry|arid|water scarcity/i
     };
-    
+
     for (const [pattern, regex] of Object.entries(emergencyKeywords)) {
       if (regex.test(query)) {
         console.log(`EMERGENCY pattern detected: ${pattern}`);
       }
     }
-    
+
     const response = await fetch(`${BASE_URL}/weather/query`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ query })
     });
-    
+
     if (!response.ok) {
       console.error(`Backend API error: ${response.status}`);
       throw new Error(`Weather API error: ${response.status}`);
     }
-    
+
     const data = await response.json();
     console.log('Response from backend:', data);
-    
+
     if (data.weatherPattern) {
       console.log(`Weather pattern from backend: ${data.weatherPattern}`);
-      
+
       for (const [pattern, regex] of Object.entries(emergencyKeywords)) {
         if (regex.test(query)) {
           console.log(`Emergency pattern detected in query but backend returned: ${data.weatherPattern}`);
@@ -89,14 +249,14 @@ export const processWeatherQuery = async (query) => {
         }
       }
     }
-    
+
     const emergencyPatterns = ['fire', 'earthquake', 'flood', 'tsunami', 'hurricane'];
     if (data.weatherPattern && emergencyPatterns.includes(data.weatherPattern)) {
       console.log(`IMPORTANT: Emergency pattern detected: ${data.weatherPattern}`);
     }
-    
+
     return data;
-    
+
   } catch (error) {
     console.error('Failed to process weather query:', error);
     console.log('Falling back to mock API');
@@ -106,7 +266,7 @@ export const processWeatherQuery = async (query) => {
 
 export const mockProcessWeatherQuery = async (query) => {
   await new Promise(resolve => setTimeout(resolve, 800));
-  
+
   let location = null;
   const locationPatterns = [
     /\bin\s+([a-zA-Z\s,]+)(?:\s|$)/i,
@@ -115,7 +275,7 @@ export const mockProcessWeatherQuery = async (query) => {
     /\bfor\s+([a-zA-Z\s,]+)(?:\s|$)/i,
     /\b(los angeles|new york|chicago|houston|miami|toronto|london|paris|tokyo|beijing|delhi|mumbai|sydney|rio|cape town)(?:\s|$)/i
   ];
-  
+
   for (const pattern of locationPatterns) {
     const match = query.match(pattern);
     if (match) {
@@ -123,9 +283,9 @@ export const mockProcessWeatherQuery = async (query) => {
       break;
     }
   }
-  
+
   location = location || 'Mumbai';
-  
+
   const cityCoordinates = {
     'mumbai': [72.8777, 19.0760],
     'delhi': [77.1025, 28.7041],
@@ -139,9 +299,9 @@ export const mockProcessWeatherQuery = async (query) => {
     'sydney': [151.2093, -33.8688],
     'paris': [2.3522, 48.8566]
   };
-  
+
   const coordinates = cityCoordinates[location.toLowerCase()] || cityCoordinates['mumbai'];
-  
+
   let weatherPattern = 'default';
   const weatherPatterns = {
     'rain': /\b(rain|rainy|rainfall|raining|precipit|shower|downpour|drizzl)\b/i,
@@ -159,14 +319,14 @@ export const mockProcessWeatherQuery = async (query) => {
     'tsunami': /\b(tsunami|tidal wave|sea level)\b/i,
     'drought': /\b(drought|dry spell|water shortage|arid)\b/i
   };
-  
+
   for (const [pattern, regex] of Object.entries(weatherPatterns)) {
     if (regex.test(query)) {
       weatherPattern = pattern;
       break;
     }
   }
-  
+
   const responses = {
     'rain': `It's currently raining in ${location} with moderate intensity. Expected to continue for the next 3 hours with approximately 15mm of rainfall.`,
     'snow': `${location} is experiencing light snowfall. Total accumulation of about 5cm expected today.`,
@@ -184,7 +344,7 @@ export const mockProcessWeatherQuery = async (query) => {
     'drought': `${location} is in day 45 of drought conditions. Water conservation measures are in effect, with restrictions on non-essential water usage.`,
     'default': `Current weather in ${location} shows normal conditions. Temperature is 22°C with moderate humidity. No extreme weather patterns detected.`
   };
-  
+
   return {
     status: 'success',
     location: location,
