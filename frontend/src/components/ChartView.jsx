@@ -1,6 +1,8 @@
 import { MapPin, ChevronLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { LineChart } from '@mui/x-charts/LineChart';
+import { BarChart } from '@mui/x-charts/BarChart';
+import geocodingService from '../services/geocodingService';
 
 const ChartView = ({ query, onClose }) => {
   // Dummy weather data for demonstration
@@ -62,6 +64,56 @@ const ChartView = ({ query, onClose }) => {
       }
     ]
   };
+
+  // City data for bar chart
+  const cityPopulationData = {
+    xAxis: [
+      {
+        scaleType: 'band',
+        data: ['Tokyo', 'Delhi', 'Shanghai', 'São Paulo', 'Mexico City', 'Cairo', 'Mumbai', 'Beijing']
+      }
+    ],
+    series: [
+      {
+        data: [37.4, 30.3, 27.1, 22.0, 21.8, 20.9, 20.4, 19.6],
+        label: 'Population (Million)',
+        color: '#8B5CF6'
+      }
+    ]
+  };
+
+  // Handle bar chart click
+  const handleBarClick = async (event, datapoint) => {
+    if (datapoint && datapoint.dataIndex !== undefined) {
+      const cityName = cityPopulationData.xAxis[0].data[datapoint.dataIndex];
+      console.log('Clicked on city:', cityName);
+      
+      try {
+        // Get coordinates using geocoding API
+        const locationData = await geocodingService.getCoordinates(cityName);
+        
+        if (locationData) {
+          console.log('Location data:', locationData);
+          // Switch to map view with the location
+          onClose('map', {
+            location: cityName,
+            coordinates: [locationData.longitude, locationData.latitude],
+            details: {
+              name: locationData.name,
+              country: locationData.country,
+              population: locationData.population,
+              timezone: locationData.timezone
+            }
+          });
+        } else {
+          console.warn('No location data found for:', cityName);
+        }
+      } catch (error) {
+        console.error('Error getting location data:', error);
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full p-2 md:p-4">
       <div className="flex flex-col h-full w-full bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-md rounded-lg shadow-lg border border-slate-700/50 overflow-hidden">
@@ -128,15 +180,16 @@ const ChartView = ({ query, onClose }) => {
                 </div>
               </div>
 
-              {/* Precipitation Chart */}
+              {/* City Population Bar Chart */}
               <div className="bg-slate-800/60 p-4 rounded-lg border border-cyan-600/30 backdrop-blur-sm">
-                <h3 className="text-lg text-cyan-200 font-medium mb-3">Monthly Precipitation</h3>
+                <h3 className="text-lg text-cyan-200 font-medium mb-3">Global Cities Population (Click to Navigate)</h3>
                 <div className="h-80">
-                  <LineChart
-                    {...precipitationData}
+                  <BarChart
+                    {...cityPopulationData}
                     height={300}
                     grid={{ vertical: true, horizontal: true }}
                     margin={{ left: 60, right: 20, top: 20, bottom: 60 }}
+                    onItemClick={handleBarClick}
                     sx={{
                       '& .MuiChartsAxis-root': {
                         '& .MuiChartsAxis-tickLabel': {
@@ -154,10 +207,14 @@ const ChartView = ({ query, onClose }) => {
                           stroke: '#374151',
                           strokeOpacity: 0.3
                         }
-                      }
+                      },
+                      cursor: 'pointer'
                     }}
                   />
                 </div>
+                <p className="text-sm text-cyan-400/70 mt-2">
+                  💡 Click on any bar to navigate to that city on the map
+                </p>
               </div>
 
               {/* Wind Speed Chart */}
@@ -222,6 +279,38 @@ const ChartView = ({ query, onClose }) => {
                       '& .MuiChartsLegend-root': {
                         '& .MuiChartsLegend-label': {
                           fill: '#E5E7EB'
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* City Population Chart */}
+              <div className="bg-slate-800/60 p-4 rounded-lg border border-indigo-600/30 backdrop-blur-sm">
+                <h3 className="text-lg text-indigo-200 font-medium mb-3">City Population (Bar Chart)</h3>
+                <div className="h-80">
+                  <BarChart
+                    {...cityPopulationData}
+                    height={300}
+                    margin={{ left: 60, right: 20, top: 20, bottom: 60 }}
+                    onClick={handleBarClick}
+                    sx={{
+                      '& .MuiChartsAxis-root': {
+                        '& .MuiChartsAxis-tickLabel': {
+                          fill: '#E5E7EB'
+                        },
+                        '& .MuiChartsAxis-line': {
+                          stroke: '#6B7280'
+                        },
+                        '& .MuiChartsAxis-tick': {
+                          stroke: '#6B7280'
+                        }
+                      },
+                      '& .MuiChartsGrid-root': {
+                        '& .MuiChartsGrid-line': {
+                          stroke: '#374151',
+                          strokeOpacity: 0.3
                         }
                       }
                     }}

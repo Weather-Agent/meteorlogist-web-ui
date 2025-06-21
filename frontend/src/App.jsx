@@ -9,8 +9,10 @@ import { useAuth } from './contexts/AuthContext';
 function AppContent() {
   const { isAuthenticated, loading, signIn } = useAuth();  
   const [showMap, setShowMap] = useState(false);
+  const [activeView, setActiveView] = useState('map'); // 'map' or 'chart'
   const [weatherQuery, setWeatherQuery] = useState(null);
   const [weatherLocation, setWeatherLocation] = useState(null);
+  const [chartLocationData, setChartLocationData] = useState(null);
   const [mapWidthPercent, setMapWidthPercent] = useState(66);
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
   const [isDragging, setIsDragging] = useState(false);
@@ -98,12 +100,39 @@ function AppContent() {
     }
   };
 
-  const handleCloseMap = () => {
-    setShowMap(false);
+  const handleCloseMap = (targetView = null, locationData = null) => {
+    if (targetView === 'map' && locationData) {
+      // Handle location data from chart bar click
+      setChartLocationData(locationData);
+      setWeatherLocation(locationData.location);
+      setActiveView('map');
+      
+      // Zoom to the city on the map if coordinates are provided
+      if (mapRef.current && mapRef.current.zoomToCity && locationData.coordinates) {
+        // Format details for the map tooltip
+        const mapDetails = {
+          population: locationData.details?.population || 'N/A',
+          country: locationData.details?.country || 'N/A',
+          timezone: locationData.details?.timezone || 'N/A',
+          area: 'N/A', // Not provided by geocoding API
+          state: 'N/A', // Not provided by geocoding API 
+          climate: 'N/A' // Not provided by geocoding API
+        };
+        mapRef.current.zoomToCity(locationData.location, locationData.coordinates, mapDetails);
+      }
+    } else if (targetView === 'chart') {
+      setActiveView('chart');
+    } else {
+      // Default close behavior
+      setShowMap(false);
+      setActiveView('map');
+      setChartLocationData(null);
+    }
   };
   
-  const handleOpenView = () => {
+  const handleOpenView = (view = 'map') => {
     setShowMap(true);
+    setActiveView(view);
   };
 
   const onDragStart = (e) => {
@@ -198,16 +227,25 @@ function AppContent() {
       >
         <div className="w-full h-full relative">
           <div className="absolute inset-0 overflow-hidden">
-            <MapView 
-              ref={mapRef}
-              location={weatherLocation} 
-              query={weatherQuery} 
-              onClose={handleCloseMap} 
-              weatherPattern={weatherPattern} 
-            />
-            
-            {/* Chart Panel - Only within map area */}
-            {showMap && <ChartPanel onCityClick={handleCityClick} />}
+            {activeView === 'map' ? (
+              <>
+                <MapView 
+                  ref={mapRef}
+                  location={weatherLocation} 
+                  query={weatherQuery} 
+                  onClose={handleCloseMap} 
+                  weatherPattern={weatherPattern} 
+                />
+                
+                {/* Chart Panel - Only within map area */}
+                {showMap && <ChartPanel onCityClick={handleCityClick} />}
+              </>
+            ) : (
+              <ChartView 
+                query={weatherQuery}
+                onClose={handleCloseMap}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -251,6 +289,7 @@ function AppContent() {
             showMapButton={true}
             showMap={showMap}
             onMapOpen={handleOpenView}
+            activeView={activeView}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center px-4">

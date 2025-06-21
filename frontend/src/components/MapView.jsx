@@ -196,18 +196,21 @@ const MapView = forwardRef(({ location, query, onClose, weatherPattern: propWeat
     'Ahmedabad': { population: '5.6M', area: '505 km²', state: 'Gujarat', climate: 'Semi-arid' }
   };
 
-  // Method to add city marker
-  const addCityMarker = (cityName, coordinates) => {
+  // Method to add city marker with optional details
+  const addCityMarker = (cityName, coordinates, details = null) => {
     if (!mapRef.current || !markerLayerRef.current) return;
 
     // Clear existing markers
     markerLayerRef.current.getSource().clear();
 
+    // Use provided details or fallback to predefined city details
+    const markerDetails = details || cityDetails[cityName] || {};
+
     // Create marker feature
     const marker = new Feature({
       geometry: new Point(fromLonLat(coordinates)),
       name: cityName,
-      details: cityDetails[cityName] || {}
+      details: markerDetails
     });
 
     // Create marker style
@@ -230,12 +233,18 @@ const MapView = forwardRef(({ location, query, onClose, weatherPattern: propWeat
     markerLayerRef.current.getSource().addFeature(marker);
   };
 
-  // Method to zoom to city
-  const zoomToCity = (cityName, coordinates) => {
+  // Method to zoom to city with optional details
+  const zoomToCity = (cityName, coordinates, details = null) => {
     if (!mapRef.current) return;
 
-    setSelectedCity(cityName);
-    addCityMarker(cityName, coordinates);
+    // Set selected city with proper details structure
+    const cityInfo = {
+      name: cityName,
+      details: details || cityDetails[cityName] || {}
+    };
+    setSelectedCity(cityInfo);
+    
+    addCityMarker(cityName, coordinates, details);
 
     mapRef.current.getView().animate({
       center: fromLonLat(coordinates),
