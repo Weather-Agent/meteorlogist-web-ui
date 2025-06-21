@@ -82,14 +82,22 @@ const Chatbot = ({
     setShowUserMenu(false);
   };
   const handleNewSession = async () => {
+    setIsProcessing(true);
     try {
-      await createNewSession();
+      console.log("Creating new session...");
+      const sessionData = await createNewSession();
+      console.log("New session created successfully:", sessionData);
+
+      // Clear the chat history when creating a new session
+      setMessages([]);
+      setInputValue("");
+
+      // Show a welcome message
       setMessages([
         {
           role: "system",
-          content: user?.name
-            ? `Hi ${user.name}! New session started. I am your AI Meteorologist. Ask me about weather conditions from anywhere!`
-            : "Hi! New session started. I am your AI Meteorologist. Ask me about weather conditions from anywhere!",
+          content:
+            "Hello! I'm your weather assistant. How can I help you today?",
         },
       ]);
     } catch (error) {
@@ -101,6 +109,8 @@ const Chatbot = ({
           content: "Failed to create new session. Please try again.",
         },
       ]);
+    } finally {
+      setIsProcessing(false);
     }
   };
 

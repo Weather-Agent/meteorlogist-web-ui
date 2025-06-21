@@ -1,7 +1,7 @@
 import { getAuthToken } from './authService';
 
 // Use proxy path for development to avoid CORS issues
-const BASE_URL = import.meta.env.DEV ? '/api' : 'http://127.0.0.1:8000/apps';
+const BASE_URL = import.meta.env.DEV ? '/api/apps' : 'http://127.0.0.1:8000/apps';
 const APP_NAME = 'weatheragent';
 
 // Session management
@@ -29,7 +29,9 @@ export const createSession = async () => {
         'accept': 'application/json'
       },
       body: JSON.stringify({
-        state: {}
+        state: {
+          additionalProp1: {}
+        }
       })
     });
 
@@ -57,36 +59,93 @@ export const createNewSession = async () => {
 
 export const sendMessageToSession = async (message) => {
   try {
-    if (!currentSessionId) {
+    // Check if we have a valid session, if not create one
+    if (!currentSessionId || !currentUserId || !(await isSessionValid())) {
+      console.log('No valid session found, creating new session...');
       await createSession();
     }
 
+    // Format the payload as required by the API
     const payload = {
+      app_name: APP_NAME,
+      user_id: currentUserId,
+      session_id: currentSessionId,
       new_message: {
         role: "user",
         parts: [{ "text": message }]
       }
     };
 
-    console.log('Sending message to session:', currentSessionId);
+    console.log('Sending message to existing session:', currentSessionId);
+    console.log('User ID:', currentUserId);
     console.log('Payload:', JSON.stringify(payload, null, 2));
 
-    const response = await fetch(`${BASE_URL}/${APP_NAME}/users/${currentUserId}/sessions/${currentSessionId}`, {
+    // Use the correct endpoint: /run with the payload
+    const url = `${import.meta.env.DEV ? '/api' : 'http://127.0.0.1:8000'}/run`;
+    console.log('Request URL:', url);
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json'
       },
       body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
+    }); if (!response.ok) {
       const errorText = await response.text();
       console.error(`Failed to send message: ${response.status} - ${errorText}`);
-      throw new Error(`Failed to send message: ${response.status}`);
-    }
+      // If session is invalid (404), create a new one and retry
+      if (response.status === 404) {
+        console.log('Session not found, creating new session and retrying...');
+        currentSessionId = null;
+        await createSession();
 
-    const events = await response.json();
+        // Update payload with new session ID
+        payload.session_id = currentSessionId;
+
+        // Retry the request with new session
+        const retryUrl = `${import.meta.env.DEV ? '/api' : 'http://127.0.0.1:8000'}/run`;
+        console.log('Retry request URL:', retryUrl);
+
+        const retryResponse = await fetch(retryUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!retryResponse.ok) {
+          const retryErrorText = await retryResponse.text();
+          throw new Error(`Failed to send message after retry: ${retryResponse.status} - ${retryErrorText}`);
+        }
+        const retryEvents = await retryResponse.json();
+
+        // Process the retry events the same way as normal events
+        const finalResponse = retryEvents
+          .filter(event => event.author === 'meterologist' &&
+            event.content?.parts?.[0]?.text)
+          .pop();
+
+        if (finalResponse) {
+          return {
+            status: 'success',
+            response: finalResponse.content.parts[0].text,
+            weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
+            location: extractLocation(message),
+            coordinates: getCoordinatesForLocation(extractLocation(message))
+          };
+        }
+
+        return {
+          status: 'error',
+          response: 'No response received from meteorologist after retry',
+          weatherPattern: 'default'
+        };
+      }
+
+      throw new Error(`Failed to send message: ${response.status} - ${errorText}`);
+    } const events = await response.json();
     console.log('Received events:', events);
 
     // Find the final response from the meteorologist
@@ -112,8 +171,63 @@ export const sendMessageToSession = async (message) => {
     };
   } catch (error) {
     console.error('Error sending message:', error);
-    throw error;
+    // If all else fails, return a mock response for better UX
+    return {
+      status: 'error',
+      response: `Error connecting to weather service: ${error.message}. Please try again later.`,
+      weatherPattern: 'default',
+      location: extractLocation(message),
+      coordinates: getCoordinatesForLocation(extractLocation(message))
+    };
   }
+};
+
+// Function to check if current session is valid
+export const isSessionValid = async () => {
+  if (!currentSessionId || !currentUserId) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/${APP_NAME}/users/${currentUserId}/sessions/${currentSessionId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+      }
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Error checking session validity:', error);
+    return false;
+  }
+};
+
+// Function to get current session info
+export const getCurrentSessionInfo = () => {
+  return {
+    sessionId: currentSessionId,
+    userId: currentUserId
+  };
+};
+
+// Debug function to log session information
+export const debugSessionInfo = () => {
+  console.log('=== Session Debug Info ===');
+  console.log('User ID:', currentUserId);
+  console.log('Session ID:', currentSessionId);
+  console.log('Base URL:', BASE_URL);
+  console.log('App Name:', APP_NAME);
+  console.log('Is Development:', import.meta.env.DEV);
+  console.log('========================');
+  return {
+    userId: currentUserId,
+    sessionId: currentSessionId,
+    baseUrl: BASE_URL,
+    appName: APP_NAME,
+    isDevelopment: import.meta.env.DEV
+  };
 };
 
 const extractWeatherPattern = (text) => {
