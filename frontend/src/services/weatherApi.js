@@ -122,9 +122,7 @@ export const sendMessageToSession = async (message) => {
         if (!retryResponse.ok) {
           const retryErrorText = await retryResponse.text();
           throw new Error(`Failed to send message after retry: ${retryResponse.status} - ${retryErrorText}`);
-        }
-
-        const retryEvents = await retryResponse.json();
+        } const retryEvents = await retryResponse.json();
         // Process the retry events the same way as normal events
         const finalResponse = retryEvents
           .filter(event => event.content?.parts?.[0]?.text &&
@@ -136,7 +134,7 @@ export const sendMessageToSession = async (message) => {
 
           return {
             status: 'success',
-            response: finalResponse.content.parts[0].text,
+            response: formatResponseText(finalResponse.content.parts[0].text),
             weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
             location: extractLocation(message),
             cityData: cityData
@@ -151,9 +149,7 @@ export const sendMessageToSession = async (message) => {
       }
 
       throw new Error(`Failed to send message: ${response.status} - ${errorText}`);
-    }
-
-    const events = await response.json();
+    } const events = await response.json();
     console.log('Received events:', events);
 
     // Find the final response from any agent with text content
@@ -167,7 +163,7 @@ export const sendMessageToSession = async (message) => {
 
       return {
         status: 'success',
-        response: finalResponse.content.parts[0].text,
+        response: formatResponseText(finalResponse.content.parts[0].text),
         weatherPattern: extractWeatherPattern(finalResponse.content.parts[0].text),
         location: extractLocation(message),
         cityData: cityData
@@ -461,4 +457,26 @@ export const mockProcessWeatherQuery = async (query) => {
     response: responses[weatherPattern],
     cityData: await generateCityDataFromResponse(responses[weatherPattern])
   };
+};
+
+// Function to format response text with proper HTML formatting
+const formatResponseText = (text) => {
+  if (!text) return text;
+
+  // Convert **text** to <strong>text</strong> for bold
+  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Convert *text* to <em>text</em> for italics (but not single asterisks used as bullet points)
+  formatted = formatted.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g, '<em>$1</em>');
+  
+  // Convert line breaks to <br> tags
+  formatted = formatted.replace(/\n/g, '<br>');
+  
+  // Convert bullet points (- or *) to proper list items
+  formatted = formatted.replace(/^[\-\*]\s(.+)$/gm, '• $1');
+  
+  // Convert numbered lists
+  formatted = formatted.replace(/^(\d+)\.\s(.+)$/gm, '$1. $2');
+  
+  return formatted;
 };
