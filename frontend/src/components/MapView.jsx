@@ -111,10 +111,11 @@ const MapView = ({
         mapRef.current.setTarget(undefined);
       }
     };
-  }, []);  useEffect(() => {
+  }, []);
+  useEffect(() => {
     if (!mapRef.current) return;
 
-    console.log('MapView cityData:', cityData); // Debug logging
+    console.log("MapView cityData:", cityData); // Debug logging
 
     // If we have city data, use it for centering
     if (cityData && cityData.length > 0) {
@@ -122,7 +123,12 @@ const MapView = ({
       const coordinates = [firstCity.coord.lon, firstCity.coord.lat];
       setMapLocation(coordinates);
 
-      console.log('Centering map on city:', firstCity.city, 'at coordinates:', coordinates);
+      console.log(
+        "Centering map on city:",
+        firstCity.city,
+        "at coordinates:",
+        coordinates
+      );
 
       let zoomLevel = 10; // Default zoom for cities
 
@@ -139,7 +145,12 @@ const MapView = ({
         }
       }
 
-      console.log('Using zoom level:', zoomLevel, 'for population:', firstCity.population);
+      console.log(
+        "Using zoom level:",
+        zoomLevel,
+        "for population:",
+        firstCity.population
+      );
 
       mapRef.current.getView().animate({
         center: fromLonLat(coordinates),
@@ -206,7 +217,7 @@ const MapView = ({
       <div className="flex flex-col h-full w-full bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-md rounded-lg shadow-lg border border-slate-700/50 overflow-hidden">
         <div className="flex items-center justify-between p-3 md:p-4 border-b border-slate-700/50">
           <h2 className="text-xl font-bold text-green-300">
-            {location ? `Weather Map: ${location}` : "Map View"}
+            {location ? `Weather Map` : "Map View"}
           </h2>
           <div className="flex space-x-2">
             <Button

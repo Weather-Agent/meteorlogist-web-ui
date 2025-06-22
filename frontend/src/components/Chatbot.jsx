@@ -116,8 +116,8 @@ const Chatbot = ({
 
   useEffect(() => {
     const greeting = user?.name
-      ? `Hi ${user.name}! I am your AI Meteorologist. Ask me about weather conditions from anywhere!`
-      : "Hi! I am your AI Meteorologist. Ask me about weather conditions from anywhere!";
+      ? `Hi ${user.name}! I am your Meghdoot AI. Ask me about weather conditions from anywhere!`
+      : "Hi! I am your Meghdoot AI. Ask me about weather conditions from anywhere!";
     setMessages([{ role: "system", content: greeting }]);
   }, [user]);
 
@@ -202,7 +202,7 @@ const Chatbot = ({
       <div className="flex flex-col h-full w-full bg-gradient-to-b from-slate-900/90 to-slate-800/90 backdrop-blur-md rounded-lg shadow-lg border border-slate-700/50">
         <div className="flex items-center justify-between p-3 md:p-4 border-b border-slate-700/50">
           <h2 className="text-xl md:text-2xl font-bold text-blue-300">
-            AI Meteorologist
+            Meghdoot AI
           </h2>
           <div className="flex items-center space-x-2">
             <Button

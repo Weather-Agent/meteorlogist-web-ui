@@ -1,6 +1,6 @@
 # 🌦️ Meteorologist Web UI
 
-A modern, interactive web application for visualizing weather data and engaging with an AI meteorologist. This React application provides a beautiful chat interface combined with an interactive map to display weather conditions across India. ⛅🗺️
+A modern, interactive web application for visualizing weather data and engaging with an Meghdoot AI. This React application provides a beautiful chat interface combined with an interactive map to display weather conditions across India. ⛅🗺️
 
 ## ✨ Features
 
@@ -73,6 +73,7 @@ The application features a draggable divider between the map and chat panels, al
 ### Weather Visualization
 
 The map component displays weather effects based on detected patterns in user queries. It includes visual representations for:
+
 - Rain, snow, and thunderstorms
 - Wind and fog effects
 - Sunny and cloudy conditions
@@ -99,6 +100,7 @@ VITE_CIVIC_CLIENT_ID=your_civic_auth_client_id
 ```
 
 To get your Civic Auth Client ID:
+
 1. 🔑 Sign up at [civic.com](https://civic.com)
 2. 📝 Create a new application
 3. 📋 Copy your Client ID

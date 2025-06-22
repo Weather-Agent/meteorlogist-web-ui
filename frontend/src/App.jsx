@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
-import Chatbot from './components/Chatbot';
-import MapView from './components/MapView';
-import ChartView from './components/ChartView';
-import { cn } from './lib/utils';
-import { useAuth } from './contexts/AuthContext';
+import { useState, useEffect, useRef } from "react";
+import Chatbot from "./components/Chatbot";
+import MapView from "./components/MapView";
+import ChartView from "./components/ChartView";
+import { cn } from "./lib/utils";
+import { useAuth } from "./contexts/AuthContext";
 
 function AppContent() {
-  const { isAuthenticated, loading, signIn } = useAuth();  
+  const { isAuthenticated, loading, signIn } = useAuth();
   const [showMap, setShowMap] = useState(false);
-  const [activeView, setActiveView] = useState('map');
+  const [activeView, setActiveView] = useState("map");
   const [weatherQuery, setWeatherQuery] = useState(null);
   const [weatherLocation, setWeatherLocation] = useState(null);
   const [mapWidthPercent, setMapWidthPercent] = useState(66);
@@ -19,14 +19,14 @@ function AppContent() {
 
   useEffect(() => {
     const onResize = () => setViewportWidth(window.innerWidth);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
-    const [weatherPattern, setWeatherPattern] = useState(null);
+  const [weatherPattern, setWeatherPattern] = useState(null);
   const [weatherCoordinates, setWeatherCoordinates] = useState(null);
   const [weatherResponse, setWeatherResponse] = useState(null);
   const [cityData, setCityData] = useState([]);
-  
+
   const handleChatSubmit = (query, responseData = null) => {
     setWeatherQuery(query);
     if (responseData) {
@@ -34,8 +34,8 @@ function AppContent() {
         setWeatherResponse(responseData.response);
         const normalConditionPatterns = [
           /normal conditions/i,
-          /clear skies/i, 
-          /no fire/i, 
+          /clear skies/i,
+          /no fire/i,
           /no earthquake/i,
           /not experiencing/i,
           /no.*reported/i,
@@ -43,19 +43,23 @@ function AppContent() {
           /hasn't been/i,
           /there isn't a/i,
           /has not been/i,
-          /no.*detected/i
+          /no.*detected/i,
         ];
-        const emergencyCheck = /fire|earthquake|flood|tsunami|hurricane|drought/i;
+        const emergencyCheck =
+          /fire|earthquake|flood|tsunami|hurricane|drought/i;
         const isEmergencyQuery = emergencyCheck.test(query);
-        const isNormalCondition = normalConditionPatterns.some(pattern => 
-          pattern.test(responseData.response));
+        const isNormalCondition = normalConditionPatterns.some((pattern) =>
+          pattern.test(responseData.response)
+        );
         if (isEmergencyQuery && isNormalCondition) {
-          setWeatherPattern('default');
+          setWeatherPattern("default");
         } else if (responseData.weatherPattern) {
           setWeatherPattern(responseData.weatherPattern);
         }
-      }      if (responseData.location) setWeatherLocation(responseData.location);
-      if (responseData.coordinates) setWeatherCoordinates(responseData.coordinates);
+      }
+      if (responseData.location) setWeatherLocation(responseData.location);
+      if (responseData.coordinates)
+        setWeatherCoordinates(responseData.coordinates);
       if (responseData.cityData) setCityData(responseData.cityData);
       setShowMap(true);
       return;
@@ -66,7 +70,7 @@ function AppContent() {
       /in\s+([a-zA-Z\s,]+)(?:\s|$)/i,
       /at\s+([a-zA-Z\s,]+)(?:\s|$)/i,
       /for\s+([a-zA-Z\s,]+)(?:\s|$)/i,
-      /\b(mumbai|delhi|bangalore|hyderabad|chennai|kolkata|new york|london|paris|tokyo)\b/i
+      /\b(mumbai|delhi|bangalore|hyderabad|chennai|kolkata|new york|london|paris|tokyo)\b/i,
     ];
     let foundLocation = null;
     for (const pattern of locationPatterns) {
@@ -82,7 +86,12 @@ function AppContent() {
       setWeatherLocation(foundLocation);
       setWeatherCoordinates(null);
       setShowMap(true);
-    } else if (isEmergency || /weather|forecast|temperature|rain|snow|wind|sunny|cloudy|storm|fog/i.test(query)) {
+    } else if (
+      isEmergency ||
+      /weather|forecast|temperature|rain|snow|wind|sunny|cloudy|storm|fog/i.test(
+        query
+      )
+    ) {
       setWeatherLocation(null);
       setWeatherCoordinates(null);
       setShowMap(true);
@@ -97,8 +106,8 @@ function AppContent() {
       setShowMap(false);
     }
   };
-  
-  const handleOpenView = (viewType = 'map') => {
+
+  const handleOpenView = (viewType = "map") => {
     setActiveView(viewType);
     setShowMap(true);
   };
@@ -108,19 +117,19 @@ function AppContent() {
     e.preventDefault();
     draggingRef.current = true;
     setIsDragging(true);
-    document.body.style.userSelect = 'none';
+    document.body.style.userSelect = "none";
   };
 
   const onDragEnd = () => {
     draggingRef.current = false;
     setIsDragging(false);
-    document.body.style.userSelect = 'auto';
+    document.body.style.userSelect = "auto";
   };
 
   const onDrag = (e) => {
     if (!draggingRef.current) return;
     let clientX;
-    if (e.type === 'touchmove') clientX = e.touches[0].clientX;
+    if (e.type === "touchmove") clientX = e.touches[0].clientX;
     else clientX = e.clientX;
     const container = containerRef.current;
     if (!container) return;
@@ -132,15 +141,15 @@ function AppContent() {
   };
 
   useEffect(() => {
-    window.addEventListener('mouseup', onDragEnd);
-    window.addEventListener('touchend', onDragEnd);
-    window.addEventListener('mousemove', onDrag);
-    window.addEventListener('touchmove', onDrag, { passive: false });
+    window.addEventListener("mouseup", onDragEnd);
+    window.addEventListener("touchend", onDragEnd);
+    window.addEventListener("mousemove", onDrag);
+    window.addEventListener("touchmove", onDrag, { passive: false });
     return () => {
-      window.removeEventListener('mouseup', onDragEnd);
-      window.removeEventListener('touchend', onDragEnd);
-      window.removeEventListener('mousemove', onDrag);
-      window.removeEventListener('touchmove', onDrag);
+      window.removeEventListener("mouseup", onDragEnd);
+      window.removeEventListener("touchend", onDragEnd);
+      window.removeEventListener("mousemove", onDrag);
+      window.removeEventListener("touchmove", onDrag);
     };
   }, []);
 
@@ -149,7 +158,9 @@ function AppContent() {
   if (loading) {
     return (
       <div className="h-screen w-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
-        <div className="text-blue-300 font-bold text-2xl animate-pulse">Loading...</div>
+        <div className="text-blue-300 font-bold text-2xl animate-pulse">
+          Loading...
+        </div>
       </div>
     );
   }
@@ -158,7 +169,12 @@ function AppContent() {
     <div
       ref={containerRef}
       className="bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden"
-      style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}
+      style={{
+        height: "100vh",
+        width: "100vw",
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+      }}
     >
       {!isAuthenticated && (
         <div className="absolute top-4 right-4 z-40">
@@ -172,39 +188,38 @@ function AppContent() {
       )}
       <div
         className={cn(
-          'overflow-hidden flex flex-col',
-          !showMap && 'pointer-events-none'
+          "overflow-hidden flex flex-col",
+          !showMap && "pointer-events-none"
         )}
         style={{
-          height: isMobile ? (showMap ? '50%' : '0') : '100%',
-          width: isMobile ? '100%' : showMap ? `${mapWidthPercent}%` : '0',
+          height: isMobile ? (showMap ? "50%" : "0") : "100%",
+          width: isMobile ? "100%" : showMap ? `${mapWidthPercent}%` : "0",
           flexShrink: 0,
-          position: 'relative',
-          transition: isDragging ? 'none' : 'all 0.3s ease',
+          position: "relative",
+          transition: isDragging ? "none" : "all 0.3s ease",
           transform: isMobile
             ? showMap
-              ? 'translateY(0)'
-              : 'translateY(-100%)'
+              ? "translateY(0)"
+              : "translateY(-100%)"
             : showMap
-            ? 'translateX(0)'
-            : 'translateX(-100%)',
+            ? "translateX(0)"
+            : "translateX(-100%)",
           opacity: showMap ? 1 : 0,
-          backgroundColor: 'inherit',
+          backgroundColor: "inherit",
           zIndex: 20,
         }}
-      >        {activeView === 'map' ? (
-          <MapView 
-            location={weatherLocation} 
-            query={weatherQuery} 
-            onClose={handleCloseMap} 
-            weatherPattern={weatherPattern} 
+      >
+        {" "}
+        {activeView === "map" ? (
+          <MapView
+            location={weatherLocation}
+            query={weatherQuery}
+            onClose={handleCloseMap}
+            weatherPattern={weatherPattern}
             cityData={cityData}
           />
         ) : (
-          <ChartView
-            query={weatherQuery}
-            onClose={handleCloseMap}
-          />
+          <ChartView query={weatherQuery} onClose={handleCloseMap} />
         )}
       </div>
       {showMap && !isMobile && (
@@ -213,30 +228,38 @@ function AppContent() {
           onTouchStart={onDragStart}
           className="cursor-col-resize bg-slate-700"
           style={{
-            width: '5px',
-            height: '100%',
-            userSelect: 'none',
-            touchAction: 'none',
-            transition: isDragging ? 'none' : 'background-color 0.3s ease',
+            width: "5px",
+            height: "100%",
+            userSelect: "none",
+            touchAction: "none",
+            transition: isDragging ? "none" : "background-color 0.3s ease",
             zIndex: 30,
           }}
-          onMouseEnter={e => !isDragging && (e.currentTarget.style.backgroundColor = '#94a3b8')}
-          onMouseLeave={e => !isDragging && (e.currentTarget.style.backgroundColor = '')}
+          onMouseEnter={(e) =>
+            !isDragging && (e.currentTarget.style.backgroundColor = "#94a3b8")
+          }
+          onMouseLeave={(e) =>
+            !isDragging && (e.currentTarget.style.backgroundColor = "")
+          }
         />
       )}
       <div
         className="flex flex-col"
         style={{
-          height: isMobile ? (showMap ? '50%' : '100%') : '100%',
-          width: isMobile ? '100%' : showMap ? `${100 - mapWidthPercent}%` : '100%',
+          height: isMobile ? (showMap ? "50%" : "100%") : "100%",
+          width: isMobile
+            ? "100%"
+            : showMap
+            ? `${100 - mapWidthPercent}%`
+            : "100%",
           flexGrow: 1,
           flexShrink: 1,
-          transition: isDragging ? 'none' : 'all 0.3s ease',
-          backgroundColor: 'inherit',
+          transition: isDragging ? "none" : "all 0.3s ease",
+          backgroundColor: "inherit",
           zIndex: 10,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {isAuthenticated ? (
@@ -250,8 +273,12 @@ function AppContent() {
         ) : (
           <div className="flex-1 flex items-center justify-center px-4">
             <div className="text-center max-w-md">
-              <h2 className="text-2xl text-blue-300 font-bold mb-4">Welcome to AI Meteorologist</h2>
-              <p className="text-slate-300 mb-6">Sign in to ask about weather conditions and view forecasts.</p>
+              <h2 className="text-2xl text-blue-300 font-bold mb-4">
+                Welcome to Meghdoot AI
+              </h2>
+              <p className="text-slate-300 mb-6">
+                Sign in to ask about weather conditions and view forecasts.
+              </p>
               <button
                 onClick={() => signIn()}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"

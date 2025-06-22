@@ -7,7 +7,8 @@ export const generateCityDataFromResponse = async (finalResponse) => {
         return [];
     }
 
-    try {        const prompt = `
+    try {
+        const prompt = `
       Analyze the following weather response and extract any cities mentioned. For each city found, generate a JSON object with the following structure:
       {
         "map_plotable": true,
@@ -26,7 +27,7 @@ export const generateCityDataFromResponse = async (finalResponse) => {
       Rules:
       1. Only extract cities that are explicitly mentioned in the response
       2. Use accurate coordinates, population, area, state, and climate data
-      3. Extract temperature and weather condition from the response for the tooltip (if not available, use "Current weather conditions")
+      3. Extract temperature and weather condition from the response for the tooltip (if not available, use "Current Status")
       4. Choose appropriate weather icon names from: weather-sunny, weather-cloudy, weather-rainy, weather-snowy, weather-stormy, weather-foggy, weather-windy, weather-hot, weather-cold
       5. If no cities are mentioned, return an empty array
       6. Return only valid JSON array format
