@@ -258,7 +258,9 @@ const Chatbot = ({
                 className={`flex ${
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
-              >                <div
+              >
+                {" "}
+                <div
                   className={`max-w-[80%] p-3 rounded-lg ${
                     message.role === "user"
                       ? "bg-blue-600/70 text-white rounded-tr-none"
@@ -288,15 +290,18 @@ const Chatbot = ({
                           EMERGENCY ALERT
                         </span>
                       </div>
-                      <div 
+                      <div
                         className="bg-red-900/30 p-2 rounded border border-red-500/50"
-                        dangerouslySetInnerHTML={{ 
-                          __html: message.content.replace("EMERGENCY ALERT:", "") 
+                        dangerouslySetInnerHTML={{
+                          __html: message.content.replace(
+                            "EMERGENCY ALERT:",
+                            ""
+                          ),
                         }}
                       />
                     </div>
                   ) : message.role === "system" ? (
-                    <div 
+                    <div
                       dangerouslySetInnerHTML={{ __html: message.content }}
                     />
                   ) : (

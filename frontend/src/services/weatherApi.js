@@ -465,18 +465,18 @@ const formatResponseText = (text) => {
 
   // Convert **text** to <strong>text</strong> for bold
   let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  
+
   // Convert *text* to <em>text</em> for italics (but not single asterisks used as bullet points)
   formatted = formatted.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g, '<em>$1</em>');
-  
+
   // Convert line breaks to <br> tags
   formatted = formatted.replace(/\n/g, '<br>');
-  
+
   // Convert bullet points (- or *) to proper list items
   formatted = formatted.replace(/^[\-\*]\s(.+)$/gm, '• $1');
-  
+
   // Convert numbered lists
   formatted = formatted.replace(/^(\d+)\.\s(.+)$/gm, '$1. $2');
-  
+
   return formatted;
 };
