@@ -212,8 +212,7 @@ export default function WeatherEffects({ pattern, location }) {
     updateAllEffectPositions(effectPosition);
     // Log position changes for debugging
     console.log(`Weather effects: Position updated to ${effectPosition.x},${effectPosition.y}`);
-  }, [effectPosition, updateAllEffectPositions]);
-  useEffect(() => {
+  }, [effectPosition, updateAllEffectPositions]);  useEffect(() => {
     if (!containerRef.current) return;
     
     // Clear any existing effects with proper cleanup
@@ -225,81 +224,16 @@ export default function WeatherEffects({ pattern, location }) {
     });
     containerRef.current.innerHTML = '';
     
-    console.log(`Creating effect for weather pattern: ${pattern}`);
-    console.log(`Current effect position:`, effectPosition);
+    console.log(`Weather pattern: ${pattern} - Effects disabled`);
     
-    // Check if animations are enabled in the browser
-    const animationsEnabled = checkAnimationsEnabled();      try {      
-      // Always create the wind effect first for persistent wind visibility
-      createWindEffect(containerRef.current, effectPosition);
-      
-      console.log(`Creating specific weather effect for pattern: ${pattern}`);
-      
-      // Add additional weather effects based on pattern
-      switch (pattern) {
-        case 'thunderstorm':
-          createThunderstormEffect(containerRef.current, effectPosition);
-          // Intensify wind for thunderstorm
-          createWindEffect(containerRef.current, effectPosition, { intensity: 'high' });
-          break;
-        case 'rain':
-          createRainEffect(containerRef.current, effectPosition);
-          break;
-        case 'wind':
-          // Add another layer of wind for stronger effect
-          createWindEffect(containerRef.current, effectPosition, { intensity: 'high' });
-          break;
-        case 'fog':
-          createFogEffect(containerRef.current, effectPosition);
-          break;
-        case 'snow':
-          createSnowEffect(containerRef.current, effectPosition);
-          // Add gentle wind for snow
-          createWindEffect(containerRef.current, effectPosition, { intensity: 'low' });
-          break;
-        case 'sunny':
-          createSunnyEffect(containerRef.current, effectPosition);
-          break;
-        case 'cloudy':
-          createCloudyEffect(containerRef.current, effectPosition);
-          break;
-        case 'flood':
-          createFloodEffect(containerRef.current, effectPosition);
-          break;
-        case 'hurricane':
-          createHurricaneEffect(containerRef.current, effectPosition);
-          // Add intense wind for hurricane
-          createWindEffect(containerRef.current, effectPosition, { intensity: 'extreme' });
-          break;
-        case 'fire':
-          createFireEffect(containerRef.current, effectPosition);
-          console.log("Created fire effect");
-          break;
-        case 'tsunami':
-          createTsunamiEffect(containerRef.current, effectPosition);
-          break;
-        case 'earthquake':
-          createEarthquakeEffect(containerRef.current, effectPosition);
-          console.log("Created earthquake effect");
-          break;
-        case 'drought':
-          createDroughtEffect(containerRef.current, effectPosition);
-          break;
-        default:
-          // Default state still has the base wind effect created above
-          console.log("Using default effect (global wind only)");
-          break;
-      }
-    } catch (error) {
-      console.error("Error creating weather effect:", error);
-    }
+    // No effects are created - all weather effects have been removed
 
     return () => {
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [pattern, effectPosition]);  // Create a resize observer for the container to handle minimizing
+  }, [pattern, effectPosition]);// Create a resize observer for the container to handle minimizing
   useEffect(() => {
     if (!containerRef.current) return;
     
@@ -353,17 +287,13 @@ const addGlobalWindEffect = (container) => {
   
   // Create improved air flow patterns with more realistic flow lines
   const airFlowPattern = document.createElement('div');
-  airFlowPattern.className = "absolute inset-0";
-  airFlowPattern.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000' viewBox='0 0 1000 1000'%3E%3Cdefs%3E%3Cmarker id='arrowhead' markerWidth='8' markerHeight='6' refX='0' refY='3' orient='auto'%3E%3Cpath d='M0,0 L0,6 L8,3 z' fill='rgba(255,255,255,0.4)' /%3E%3C/marker%3E%3C/defs%3E%3Cg%3E%3Cpath d='M10,100 Q100,80 200,100 T400,90 T600,110 T800,90' stroke='rgba(255,255,255,0.3)' stroke-width='1.2' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M10,250 Q120,230 240,250 T450,230 T650,250 T850,230' stroke='rgba(255,255,255,0.25)' stroke-width='1.1' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M50,400 Q150,380 250,400 T450,380 T650,400 T850,380' stroke='rgba(255,255,255,0.3)' stroke-width='1.2' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M30,550 Q130,530 230,550 T430,530 T630,550 T830,530' stroke='rgba(255,255,255,0.25)' stroke-width='1.1' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M10,700 Q110,680 210,700 T410,680 T610,700 T810,680' stroke='rgba(255,255,255,0.3)' stroke-width='1.2' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M40,850 Q140,830 240,850 T440,830 T640,850 T840,830' stroke='rgba(255,255,255,0.25)' stroke-width='1.1' fill='none' marker-end='url(%23arrowhead)' /%3E%3C/g%3E%3C/svg%3E")`;
+  airFlowPattern.className = "absolute inset-0";  airFlowPattern.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000' viewBox='0 0 1000 1000'%3E%3Cdefs%3E%3Cmarker id='arrowhead' markerWidth='8' markerHeight='6' refX='0' refY='3' orient='auto'%3E%3Cpath d='M0,0 L0,6 L8,3 z' fill='rgba(255,255,255,0.4)' /%3E%3C/marker%3E%3C/defs%3E%3Cg%3E%3Cpath d='M10,100 Q100,80 200,100 T400,90 T600,110 T800,90' stroke='rgba(255,255,255,0.3)' stroke-width='1.2' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M10,250 Q120,230 240,250 T450,230 T650,250 T850,230' stroke='rgba(255,255,255,0.25)' stroke-width='1.1' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M50,400 Q150,380 250,400 T450,380 T650,400 T850,380' stroke='rgba(255,255,255,0.3)' stroke-width='1.2' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M30,550 Q130,530 230,550 T430,530 T630,550 T830,530' stroke='rgba(255,255,255,0.25)' stroke-width='1.1' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M10,700 Q110,680 210,700 T410,680 T610,700 T810,680' stroke='rgba(255,255,255,0.3)' stroke-width='1.2' fill='none' marker-end='url(%23arrowhead)' /%3E%3Cpath d='M40,850 Q140,830 240,850 T440,830 T640,850 T840,830' stroke='rgba(255,255,255,0.25)' stroke-width='1.1' fill='none' marker-end='url(%23arrowhead)' /%3E%3C/g%3E%3C/svg%3E")`;
   airFlowPattern.style.backgroundSize = '1000px 1000px';
-  airFlowPattern.style.animation = 'moveAirFlow 60s linear infinite'; // Slower for more realistic air movement
   
   // Add second air flow layer with different pattern for better cross-flow visualization
   const secondaryAirFlowPattern = document.createElement('div');
-  secondaryAirFlowPattern.className = "absolute inset-0";
-  secondaryAirFlowPattern.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3Cmarker id='arrowhead2' markerWidth='6' markerHeight='5' refX='0' refY='2.5' orient='auto'%3E%3Cpath d='M0,0 L0,5 L6,2.5 z' fill='rgba(255,255,255,0.3)' /%3E%3C/marker%3E%3C/defs%3E%3Cg%3E%3Cpath d='M300,10 Q280,100 300,190 T280,380 T300,570 T280,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M600,10 Q580,100 600,190 T580,380 T600,570 T580,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M500,10 Q480,100 500,190 T480,380 T500,570 T480,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M200,10 Q180,100 200,190 T180,380 T200,570 T180,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M400,10 Q380,100 400,190 T380,380 T400,570 T380,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M700,10 Q680,100 700,190 T680,380 T700,570 T680,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3C/g%3E%3C/svg%3E")`;
+  secondaryAirFlowPattern.className = "absolute inset-0";  secondaryAirFlowPattern.style.backgroundImage = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3Cmarker id='arrowhead2' markerWidth='6' markerHeight='5' refX='0' refY='2.5' orient='auto'%3E%3Cpath d='M0,0 L0,5 L6,2.5 z' fill='rgba(255,255,255,0.3)' /%3E%3C/marker%3E%3C/defs%3E%3Cg%3E%3Cpath d='M300,10 Q280,100 300,190 T280,380 T300,570 T280,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M600,10 Q580,100 600,190 T580,380 T600,570 T580,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M500,10 Q480,100 500,190 T480,380 T500,570 T480,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M200,10 Q180,100 200,190 T180,380 T200,570 T180,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M400,10 Q380,100 400,190 T380,380 T400,570 T380,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3Cpath d='M700,10 Q680,100 700,190 T680,380 T700,570 T680,760' stroke='rgba(255,255,255,0.2)' stroke-width='1' fill='none' marker-end='url(%23arrowhead2)' /%3E%3C/g%3E%3C/svg%3E")`;
   secondaryAirFlowPattern.style.backgroundSize = '800px 800px';
-  secondaryAirFlowPattern.style.animation = 'moveVerticalAirFlow 70s linear infinite'; // Vertical movement
   
   // Add wind particle layer for more dynamic air flow movement
   const windParticlesLayer = document.createElement('div');
@@ -385,15 +315,9 @@ const addGlobalWindEffect = (container) => {
     } else {
       windParticle.style.backgroundColor = 'rgba(255,255,255,0.4)';
     }
-    
-    // Position particles across the screen at varied heights
+      // Position particles across the screen at varied heights
     windParticle.style.left = `-10px`;
     windParticle.style.top = `${Math.random() * 100}%`;
-    
-    // Add slight curved path animation for air flow feel
-    const animationDuration = 7 + Math.random() * 12; // Slightly slower for air-like movement
-    windParticle.style.animation = `airParticleFlow ${animationDuration}s linear infinite`;
-    windParticle.style.animationDelay = `${Math.random() * 10}s`;
     
     // Custom transform for each air particle
     const height = Math.floor(Math.random() * 100);
@@ -415,71 +339,17 @@ const addGlobalWindEffect = (container) => {
     streamline.style.height = '1px';
     streamline.style.width = '180px';
     streamline.style.background = 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%)';
-    
-    // Distribute streamlines across the height
+      // Distribute streamlines across the height
     streamline.style.top = `${i * 10 + Math.random() * 5}%`;
     streamline.style.left = '0';
     
-    // Gentler animation for air flow
-    streamline.style.animation = `airStreamFlow ${12 + Math.random() * 8}s linear infinite`;
-    streamline.style.animationDelay = `${Math.random() * 8}s`;
-    
     globalWindOverlay.appendChild(streamline);
-  }
-  // Add custom keyframes for improved air flow animations
+  }  // Add custom keyframes for improved air flow animations
   const windStyleElement = document.createElement('style');
   windStyleElement.textContent = `
-    @keyframes moveAirFlow {
-      0% {
-        background-position: 0 0;
-      }
-      100% {
-        background-position: 1000px 0;
-      }
-    }
-    
-    @keyframes moveVerticalAirFlow {
-      0% {
-        background-position: 0 0;
-      }
-      100% {
-        background-position: 0 800px;
-      }
-    }
-    
-    @keyframes airParticleFlow {
-      0% {
-        transform: translateX(0) translateY(0);
-        opacity: 0;
-      }
-      5% {
-        opacity: 0.6;
-      }
-      95% {
-        opacity: 0.6;
-        transform: translateX(calc(100vw - 20px)) translateY(var(--curve, 0px));
-      }
-      100% {
-        transform: translateX(calc(100vw + 20px)) translateY(var(--curve, 0px));
-        opacity: 0;
-      }
-    }
-    
-    @keyframes airStreamFlow {
-      0% {
-        transform: translateX(-180px) translateY(0);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.5;
-      }
-      90% {
-        opacity: 0.5;
-      }
-      100% {
-        transform: translateX(calc(100vw + 20px)) translateY(3px);
-        opacity: 0;
-      }
+    /* Static air flow styles - no animations */
+    .air-flow-static {
+      opacity: 0.5;
     }
   `;
     globalWindOverlay.appendChild(windStyleElement);
@@ -535,13 +405,12 @@ const createThunderstormEffect = (container, position) => {
       lightningArea.style.top = `${newPos.y}px`;
     }
   };
-  
-  // Create lightning animation styles
+    // Create lightning animation styles
   const lightningStyle = document.createElement('style');
   lightningStyle.textContent = `
-    @keyframes lightning-flash {
-      0%, 100% { opacity: 0; }
-      0.5%, 5% { opacity: 1; }
+    /* Static lightning styles - no animations */
+    .lightning-static {
+      opacity: 0.8;
     }
   `;
   lightningArea.appendChild(lightningStyle);
@@ -612,17 +481,12 @@ const createThunderstormEffect = (container, position) => {
     // Position clouds across the top with more overlap for complete dark sky effect
     cloud.style.left = `${(i * 80) - 60 + (Math.random() * 70 - 35)}px`;
     cloud.style.top = `${Math.random() * 120}px`;
-    
-    // Almost black clouds with very little variation for more dramatic effect
+      // Almost black clouds with very little variation for more dramatic effect
     const darkValue = 15 + Math.random() * 20; // Darker range (15-35)
     cloud.style.backgroundColor = `rgb(${darkValue}, ${darkValue}, ${darkValue + 5})`;
     cloud.style.opacity = `${0.9 + Math.random() * 0.1}`; // Higher opacity
     cloud.style.boxShadow = '0 8px 20px rgba(0,0,0,0.5)'; // Stronger shadow
     cloud.style.filter = 'blur(5px)'; // More blur for ominous look
-    
-    // Add subtle float animation
-    cloud.style.animation = `float ${15 + Math.random() * 12}s ease-in-out infinite alternate`;
-    cloud.style.animationDelay = `${Math.random() * 5}s`;
     
     cloudLayer.appendChild(cloud);
     
@@ -670,14 +534,10 @@ const createThunderstormEffect = (container, position) => {
     
     cloud.style.left = `${(i * 110) - 40 + (Math.random() * 60 - 30)}px`;
     cloud.style.top = `${Math.random() * 70}px`;
-    
-    const darkValue = 20 + Math.random() * 25;
+      const darkValue = 20 + Math.random() * 25;
     cloud.style.backgroundColor = `rgb(${darkValue}, ${darkValue}, ${darkValue+5})`;
     cloud.style.opacity = '0.85';
     cloud.style.filter = 'blur(4px)';
-    
-    cloud.style.animation = `float ${18 + Math.random() * 10}s ease-in-out infinite alternate-reverse`;
-    cloud.style.animationDelay = `${Math.random() * 5}s`;
     
     secondCloudLayer.appendChild(cloud);
   }
@@ -726,14 +586,11 @@ const createThunderstormEffect = (container, position) => {
     
     lightningPath.appendChild(path);
     mainBolt.appendChild(lightningPath);
-    
-    // Add glowing effect to lightning
+      // Add glowing effect to lightning
     mainBolt.style.filter = "drop-shadow(0 0 8px rgba(255, 255, 200, 0.8))";
     
     // Create flash animation
-    mainBolt.style.opacity = "0";
-    mainBolt.style.animation = `lightningFlash ${3 + Math.random() * 5}s ease-out infinite`;
-    mainBolt.style.animationDelay = `${Math.random() * 5}s`;
+    mainBolt.style.opacity = "0.8";
     
     lightningGroup.appendChild(mainBolt);
     
@@ -764,11 +621,8 @@ const createThunderstormEffect = (container, position) => {
         
         branchingSvg.appendChild(branchPath);
         branchBolt.appendChild(branchingSvg);
-        
-        branchBolt.style.filter = "drop-shadow(0 0 5px rgba(255, 255, 200, 0.6))";
-        branchBolt.style.opacity = "0";
-        branchBolt.style.animation = `lightningFlash ${3 + Math.random() * 5}s ease-out infinite`;
-        branchBolt.style.animationDelay = `${Math.random() * 5 + 0.1}s`;
+          branchBolt.style.filter = "drop-shadow(0 0 5px rgba(255, 255, 200, 0.6))";
+        branchBolt.style.opacity = "0.6";
         
         lightningGroup.appendChild(branchBolt);
       }
@@ -776,7 +630,6 @@ const createThunderstormEffect = (container, position) => {
     
     area.appendChild(lightningGroup);
   }
-
   // Add rain for the thunderstorm
   for (let i = 0; i < 150; i++) {
     const raindrop = document.createElement('div');
@@ -786,38 +639,23 @@ const createThunderstormEffect = (container, position) => {
     raindrop.style.left = `${Math.random() * 800}px`;
     raindrop.style.top = `${Math.random() * 600}px`;
     raindrop.style.opacity = `${0.6 + Math.random() * 0.4}`;
-    raindrop.style.animation = `rain ${0.7 + Math.random() * 0.5}s linear infinite`;
-    raindrop.style.animationDelay = `${Math.random() * 2}s`;
     raindrop.style.transform = 'rotate(10deg)';  // Angled rain for storm effect
     area.appendChild(raindrop);
   }
-  
-  // Add custom keyframes for lightning flash
+    // Add custom keyframes for lightning flash
   const styleElement = document.createElement('style');
   styleElement.textContent = `
-    @keyframes lightningFlash {
-      0%, 100% { opacity: 0; }
-      49.9% { opacity: 0; }
-      50% { opacity: 0.9; }
-      52% { opacity: 0.5; }
-      54% { opacity: 0.9; }
-      60% { opacity: 0; }
-    }
-    
-    @keyframes backgroundFlash {
-      0%, 100% { background-color: rgba(0, 0, 0, 0); }
-      50% { background-color: rgba(255, 255, 200, 0.2); }
-      60% { background-color: rgba(0, 0, 0, 0); }
+    /* Static thunderstorm styles - no animations */
+    .thunderstorm-static {
+      opacity: 0.8;
     }
   `;
   area.appendChild(styleElement);
-  
-  // Add occasional background flash effect for whole scene
+    // Add occasional background flash effect for whole scene
   const flashOverlay = document.createElement('div');
   flashOverlay.className = "absolute inset-0";
   flashOverlay.style.zIndex = '6';
   flashOverlay.style.pointerEvents = 'none';
-  flashOverlay.style.animation = 'backgroundFlash 7s ease-out infinite';
   area.appendChild(flashOverlay);
   
   container.appendChild(area);
@@ -855,16 +693,12 @@ const createRainEffect = (container, position) => {
   area.style.zIndex = '9'; // Below clouds
   
   area.setAttribute('data-effect-type', 'rain');
-    // Create more visible rain animation with faster drops
+  // Create more visible rain animation with faster drops
   const style = document.createElement('style');
   style.textContent = `
-    @keyframes rainfall {
-      0% { transform: translateY(0) translateX(0); opacity: 0.8; }
-      100% { transform: translateY(300px) translateX(-15px); opacity: 0.1; }
-    }
-    @keyframes heavyRainfall {
-      0% { transform: translateY(0) translateX(0); opacity: 0.9; }
-      100% { transform: translateY(350px) translateX(-20px); opacity: 0.15; }
+    /* Static rain styles - no animations */
+    .rain-static {
+      opacity: 0.8;
     }
   `;
   area.appendChild(style);
@@ -875,13 +709,11 @@ const createRainEffect = (container, position) => {
     drop.className = "absolute";
       // Make raindrops very noticeable
     const isHeavy = Math.random() > 0.5; // 50% chance of heavy rain
-    
-    if (isHeavy) {
+      if (isHeavy) {
       // Heavier, much more visible drops
       drop.style.backgroundColor = "rgba(220, 240, 255, 0.95)"; // Higher opacity
       drop.style.width = `${2.0 + Math.random() * 2.0}px`; // Much wider drops
       drop.style.height = `${25 + Math.random() * 15}px`; // Much longer drops
-      drop.style.animation = `heavyRainfall ${0.3 + Math.random() * 0.2}s linear infinite`; // Even faster
       drop.style.boxShadow = '0 0 4px rgba(255, 255, 255, 0.5)'; // Stronger glow
       drop.style.filter = 'blur(0.5px)'; // Less blur for sharper appearance
     } else {
@@ -889,7 +721,6 @@ const createRainEffect = (container, position) => {
       drop.style.backgroundColor = "rgba(200, 230, 255, 0.85)"; // Higher opacity
       drop.style.width = `${1.5 + Math.random() * 1.5}px`; // Wider drops
       drop.style.height = `${20 + Math.random() * 10}px`; // Longer drops
-      drop.style.animation = `rainfall ${0.35 + Math.random() * 0.25}s linear infinite`; // Faster
       drop.style.boxShadow = '0 0 2px rgba(255, 255, 255, 0.4)'; // Add glow
     }
     
@@ -898,13 +729,9 @@ const createRainEffect = (container, position) => {
     const gridWidth = 12; // 12 columns
     const row = Math.floor(i / gridWidth) % Math.floor(100/cellSize);
     const col = i % gridWidth;
-    
-    // Position drops in a grid with some randomness
+      // Position drops in a grid with some randomness
     drop.style.left = `${col * (100/gridWidth) + Math.random() * (80/gridWidth)}%`;
     drop.style.top = `${row * cellSize + Math.random() * cellSize}%`;
-    
-    // Staggered animation start
-    drop.style.animationDelay = `${Math.random() * 1}s`;
     
     area.appendChild(drop);
   }
@@ -1007,15 +834,8 @@ const createRainEffect = (container, position) => {
     const cloudType = cloudTypes[Math.floor(Math.random() * cloudTypes.length)];
     cloud.style.backgroundColor = cloudType.color;
     cloud.style.opacity = cloudType.opacity;
-    cloud.style.boxShadow = cloudType.shadow;
-    cloud.style.filter = `blur(${cloudType.blur})`;
+    cloud.style.boxShadow = cloudType.shadow;    cloud.style.filter = `blur(${cloudType.blur})`;
     cloud.style.willChange = 'transform'; // Performance optimization
-    
-    // Add more active floating animation
-    const floatDuration = 12 + Math.random() * 15;
-    const floatDistance = 15 + Math.random() * 30;
-    cloud.style.animation = `cloudPulsate ${6 + Math.random() * 5}s ease-in-out infinite alternate`;
-    cloud.style.animationDelay = `${Math.random() * 8}s`;
     
     cloudLayer.appendChild(cloud);    
     // Add more cloud puffs for realistic rain cloud formations
@@ -1069,16 +889,11 @@ const createRainEffect = (container, position) => {
     
     cloud.style.left = `${(i * 70) - 30 + (Math.random() * 40 - 20)}px`;
     cloud.style.top = `${Math.random() * 70}px`;
-    
-    // Lighter gray for secondary layer but still visible
+      // Lighter gray for secondary layer but still visible
     const grayValue = 150 + Math.random() * 50;
     cloud.style.backgroundColor = `rgb(${grayValue}, ${grayValue}, ${grayValue+5})`;
     cloud.style.opacity = '0.8'; // Higher opacity for better visibility
     cloud.style.filter = 'blur(2.5px)'; // Less blur for better definition
-    
-    // More active animation
-    cloud.style.animation = `float ${12 + Math.random() * 6}s ease-in-out infinite alternate-reverse`;
-    cloud.style.animationDelay = `${Math.random() * 4}s`;
     
     secondCloudLayer.appendChild(cloud);
   }
@@ -1086,20 +901,9 @@ const createRainEffect = (container, position) => {
   area.appendChild(secondCloudLayer);  // Add raindrops CSS animations directly to make sure they're available
   const rainAnimStyles = document.createElement('style');
   rainAnimStyles.textContent = `
-    @keyframes rainfall {
-      0% { transform: translateY(-20px) translateX(0); opacity: 0.95; }
-      80% { opacity: 0.95; }
-      100% { transform: translateY(600px) translateX(-20px); opacity: 0.4; }
-    }
-    @keyframes heavyRainfall {
-      0% { transform: translateY(-20px) translateX(0); opacity: 1; }
-      80% { opacity: 1; }
-      100% { transform: translateY(600px) translateX(-25px); opacity: 0.5; }
-    }
-    @keyframes lightRainfall {
-      0% { transform: translateY(-10px) translateX(0); opacity: 0.8; }
-      80% { opacity: 0.8; }
-      100% { transform: translateY(400px) translateX(-15px); opacity: 0.3; }
+    /* Static rain styles - no animations */
+    .static-rain {
+      opacity: 0.9;
     }
   `;
   area.appendChild(rainAnimStyles);
@@ -1108,8 +912,7 @@ const createRainEffect = (container, position) => {
     const raindrop = document.createElement('div');
     
     // Create more visible raindrop types with increased variation
-    const dropType = Math.random();
-      if (dropType < 0.4) { // 40% chance of heavy drops - increased from 30%
+    const dropType = Math.random();      if (dropType < 0.4) { // 40% chance of heavy drops - increased from 30%
       raindrop.className = "absolute rounded-full";
       raindrop.style.backgroundColor = 'rgba(220, 240, 255, 0.98)';
       raindrop.style.width = `${3 + Math.random() * 3}px`; // Wider drops
@@ -1117,14 +920,13 @@ const createRainEffect = (container, position) => {
       raindrop.style.opacity = '0.98'; // Increased opacity
       raindrop.style.boxShadow = '0 0 8px rgba(220, 240, 255, 0.9), 0 0 3px rgba(255, 255, 255, 0.8)'; // Enhanced glow
       raindrop.style.filter = 'blur(0.5px)'; // Slight blur for better visibility
-      raindrop.style.animation = `heavyRainfall ${0.35 + Math.random() * 0.2}s linear infinite`; // Faster animation    } else if (dropType < 0.8) { // 40% chance of medium drops (increased from 45%)
+    } else if (dropType < 0.8) { // 40% chance of medium drops (increased from 45%)
       raindrop.className = "absolute rounded-full";
       raindrop.style.backgroundColor = 'rgba(200, 230, 255, 0.95)';
       raindrop.style.width = `${2.2 + Math.random() * 2}px`; // Wider
       raindrop.style.height = `${25 + Math.random() * 35}px`; // Longer
       raindrop.style.opacity = '0.95'; // Increased opacity
       raindrop.style.boxShadow = '0 0 4px rgba(200, 230, 255, 0.7)'; // Enhanced glow
-      raindrop.style.animation = `rainfall ${0.45 + Math.random() * 0.2}s linear infinite`; // Faster
     } else { // 20% chance of lighter drops (reduced from 25%)
       raindrop.className = "absolute rounded-full";
       raindrop.style.backgroundColor = 'rgba(180, 210, 255, 0.9)';
@@ -1132,7 +934,6 @@ const createRainEffect = (container, position) => {
       raindrop.style.height = `${20 + Math.random() * 25}px`; // Longer
       raindrop.style.opacity = '0.9'; // Increased opacity
       raindrop.style.boxShadow = '0 0 2px rgba(180, 210, 255, 0.4)'; // Added glow
-      raindrop.style.animation = `lightRainfall ${0.55 + Math.random() * 0.25}s linear infinite`; // Faster
     }
       // Rain distribution - full coverage across the entire viewport for maximum visibility
     const width = 700;  // Use full width
@@ -1148,14 +949,11 @@ const createRainEffect = (container, position) => {
     const jitterY = Math.random() * 50 - 25;       // Add some randomness
     
     // Position based on grid with jitter for natural look but ensure full coverage
-    raindrop.style.left = `${gridX * 50 + jitterX}px`;
-    raindrop.style.top = `${gridY * 50 + jitterY}px`;
+    raindrop.style.left = `${gridX * 50 + jitterX}px`;    raindrop.style.top = `${gridY * 50 + jitterY}px`;
     
     // Add varying angles to rain to suggest wind gusts - more variation
     const angle = 10 + (Math.random() * 8 - 4); // 6-18 degree angle
     raindrop.style.transform = `rotate(${angle}deg)`;
-      // No need to set animation delay, it's handled in the animation definition
-    raindrop.style.animationDelay = `${Math.random() * 1}s`; // Shorter delay for faster initial effect
     area.appendChild(raindrop);
   }  
   
@@ -1204,31 +1002,19 @@ const createRainEffect = (container, position) => {
       splash.style.left = `${Math.random() * 700}px`; // Still contained
       splash.style.bottom = `${Math.random() * 80}px`; // Various heights
     }
-    
-    splash.style.zIndex = '12';
+      splash.style.zIndex = '12';
     
     // More dynamic, faster splash animation with varied timing for better effect
     const splashSpeed = 0.2 + Math.random() * 0.8; // Faster animation
-    splash.style.animation = `splash ${splashSpeed}s linear infinite`;
-    splash.style.animationDelay = `${Math.random() * 1}s`; // Shorter delay for faster initial effect
     
     area.appendChild(splash);
   }
-  
-  // Add custom keyframes for enhanced splash effects with better visibility
+    // Add custom keyframes for enhanced splash effects with better visibility
   const splashStyleElement = document.createElement('style');
   splashStyleElement.textContent = `
-    @keyframes splash {
-      0% { transform: scale(0); opacity: 0.95; }
-      20% { opacity: 0.9; }
-      50% { transform: scale(2.5); opacity: 0.7; }
-      100% { transform: scale(5); opacity: 0; }
-    }
-    
-    @keyframes rain {
-      0% { transform: translateY(0) translateX(0); }
-      85% { opacity: 0.9; }
-      100% { transform: translateY(150px) translateX(-15px); opacity: 0; }
+    /* Static splash styles - no animations */
+    .splash-static {
+      opacity: 0.8;
     }
   `;
   area.appendChild(splashStyleElement);
@@ -1311,11 +1097,8 @@ const createWindEffect = (container, position) => {
     const y = 200 + Math.sin(angle) * radius;
     
     wind.style.left = `${x}px`;
-    wind.style.top = `${y}px`;
-      // Enhanced animation properties
+    wind.style.top = `${y}px`;    // Enhanced animation properties
     wind.style.opacity = `${0.5 + Math.random() * 0.5}`; // Increased opacity
-    wind.style.animationDuration = `${0.8 + Math.random() * 1.5}s`; // Faster animation
-    wind.style.animationDelay = `${Math.random() * 1.5}s`;
     wind.style.filter = 'blur(1px) drop-shadow(0 0 2px rgba(255,255,255,0.3))'; // Added glow
     wind.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
     
@@ -1365,22 +1148,17 @@ const createWindEffect = (container, position) => {
         />
       </g>
     </svg>`;
-    
-    // Smoother animation for thin lines
-    arrow.style.animation = `windArrowFloat ${2 + Math.random() * 1.5}s infinite ease-in-out`;
-    arrow.style.animationDelay = `${Math.random() * 1.5}s`;
+      // Smoother animation for thin lines
     arrow.style.opacity = '0.8'; // Slightly reduced opacity for thinner lines
     
     area.appendChild(arrow);
   }
-  
-  // Add arrow animation keyframes
+    // Add arrow animation keyframes
   const arrowStyleElement = document.createElement('style');
   arrowStyleElement.textContent = `
-    @keyframes windArrow {
-      0% { opacity: 0.4; transform: translateX(0px) rotate(${-10 + Math.random() * 5}deg) scale(0.9); }
-      50% { opacity: 0.95; transform: translateX(15px) rotate(${-10 + Math.random() * 5}deg) scale(1.1); }
-      100% { opacity: 0.4; transform: translateX(0px) rotate(${-10 + Math.random() * 5}deg) scale(0.9); }
+    /* Static wind arrow styles - no animations */
+    .wind-arrow-static {
+      opacity: 0.8;
     }
   `;
   area.appendChild(arrowStyleElement);
@@ -1391,9 +1169,8 @@ const createWindEffect = (container, position) => {
 const createFogEffect = (container) => {
   const area = document.createElement('div');
   area.className = "absolute w-full h-full pointer-events-none";
-
   const fog = document.createElement('div');
-  fog.className = "absolute inset-0 bg-white opacity-40 animate-fog";
+  fog.className = "absolute inset-0 bg-white opacity-40";
   fog.style.backdropFilter = 'blur(8px)';
   area.appendChild(fog);
 
@@ -1407,17 +1184,14 @@ const createSnowEffect = (container, position) => {
   area.style.top = `${position.y - 48}px`;
   area.style.transform = 'translate(-50%, -50%)';
   area.style.transition = 'left 0.5s, top 0.5s';
-
   for (let i = 0; i < 50; i++) {
     const snowflake = document.createElement('div');
-    snowflake.className = "absolute bg-white rounded-full animate-snow";
+    snowflake.className = "absolute bg-white rounded-full";
     snowflake.style.width = `${2 + Math.random() * 4}px`;
     snowflake.style.height = `${2 + Math.random() * 4}px`;
     snowflake.style.left = `${Math.random() * 96}px`;
     snowflake.style.top = `${Math.random() * 96}px`;
     snowflake.style.opacity = `${0.6 + Math.random() * 0.4}`;
-    snowflake.style.animationDuration = `${3 + Math.random() * 5}s`;
-    snowflake.style.animationDelay = `${Math.random() * 5}s`;
     area.appendChild(snowflake);
   }
 
@@ -1431,16 +1205,14 @@ const createSunnyEffect = (container, position) => {
   area.style.top = `${position.y - 32}px`;
   area.style.transform = 'translate(-50%, -50%)';
   area.style.transition = 'left 0.5s, top 0.5s';
-
   const sun = document.createElement('div');
-  sun.className = "absolute rounded-full animate-pulse";
+  sun.className = "absolute rounded-full";
   sun.style.width = '40px';
   sun.style.height = '40px';
   sun.style.background = 'radial-gradient(circle, rgba(255,236,100,0.8) 0%, rgba(255,167,0,0) 70%)';
   sun.style.left = '12px';
   sun.style.top = '12px';
   sun.style.filter = 'blur(3px)';
-  sun.style.animationDuration = '3s';
   area.appendChild(sun);
 
   container.appendChild(area);
@@ -1519,12 +1291,10 @@ const createCloudyEffect = (container, position) => {
     // Position clouds across the area - better distribution for smaller area
     cloud.style.left = `${(i * 55) + Math.random() * 25}px`; // Reduced spacing from 70 to 55
     cloud.style.top = `${Math.random() * 60}px`; // Reduced from 80 to 60
-    
-    // White fluffy clouds - increased contrast for better visibility despite smaller size
+      // White fluffy clouds - increased contrast for better visibility despite smaller size
     cloud.style.backgroundColor = 'rgba(245, 245, 255, 0.9)'; // Increased from 0.85 to 0.9 opacity
     cloud.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.4)'; // Increased from 0.3 to 0.4
     cloud.style.filter = 'blur(3px)'; // Reduced blur from 5px to 3px for sharper definition
-    cloud.style.animation = `float-slow ${12 + Math.random() * 8}s ease-in-out infinite alternate`; // Slightly faster
     
     area.appendChild(cloud);
       // Add puffy parts to each cloud - smaller but more defined
@@ -1696,25 +1466,18 @@ const createFloodEffect = (container, position) => {
     
     waterPatch.style.background = waterColor;
     waterPatch.style.boxShadow = '0 0 5px rgba(0,70,150,0.2)';
-    
-    // Set base opacity as CSS variable for animation
+      // Set base opacity as CSS variable for animation
     waterPatch.style.setProperty('--base-opacity', patch.opacity);
     waterPatch.style.opacity = patch.opacity;
-    
-    // Add subtle pulsing - more minimal animation
-    waterPatch.style.animation = `subtlePulse ${3 + Math.random() * 2}s ease-in-out infinite`;
-    waterPatch.style.animationDelay = `${Math.random() * 1.5}s`;
     waterPatch.style.zIndex = '17';
     
     // Add gentle wave texture
     const waveTexture = document.createElement('div');
     waveTexture.className = "absolute inset-0 overflow-hidden";
     waveTexture.style.borderRadius = 'inherit';
-    
-    // Subtle wave pattern
+      // Subtle wave pattern
     waveTexture.style.backgroundImage = 'linear-gradient(45deg, rgba(255,255,255,0.07) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.07) 75%, transparent 75%, transparent)';
     waveTexture.style.backgroundSize = '15px 15px';
-    waveTexture.style.animation = `gentleWave ${5 + Math.random() * 4}s linear infinite`;
     waveTexture.style.opacity = '0.3';
     waterPatch.appendChild(waveTexture);
     
@@ -1728,12 +1491,9 @@ const createFloodEffect = (container, position) => {
       rippleContainer.style.top = `${Math.random() * 70 + 15}%`;
       rippleContainer.style.width = '20px';
       rippleContainer.style.height = '20px';
-      
-      const ripple = document.createElement('div');
+        const ripple = document.createElement('div');
       ripple.className = "absolute inset-0 rounded-full";
       ripple.style.border = '1px solid rgba(255, 255, 255, 0.5)';
-      ripple.style.animation = `waterRipple ${2 + Math.random()}s ease-out infinite`;
-      ripple.style.animationDelay = `${Math.random() * 1.5}s`;
       
       rippleContainer.appendChild(ripple);
       waterPatch.appendChild(rippleContainer);
@@ -1749,9 +1509,8 @@ const createFloodEffect = (container, position) => {
   warning.style.width = '80px'; // Smaller
   warning.style.height = '80px'; // Smaller
   warning.style.zIndex = '20';
-  
-  warning.innerHTML = `
-    <div class="w-16 h-16 rounded-full bg-blue-600 bg-opacity-80 flex items-center justify-center animate-pulse border-2 border-blue-200">
+    warning.innerHTML = `
+    <div class="w-16 h-16 rounded-full bg-blue-600 bg-opacity-80 flex items-center justify-center border-2 border-blue-200">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
         <path d="M12 9v4M12 17h.01M4.929 19H19.07c1.275 0 2.12-1.335 1.551-2.443L13.235 4.304c-.614-1.183-2.307-1.183-2.92 0L2.427 16.557C1.91 17.622 2.69 19 4.929 19z"/>
       </svg>
@@ -1789,36 +1548,31 @@ const createHurricaneEffect = (container, position) => {
   spiral.style.width = '500px';
   spiral.style.height = '500px';
   spiral.style.left = '150px';
-  spiral.style.top = '150px';
-  spiral.style.borderRadius = '50%';
+  spiral.style.top = '150px';  spiral.style.borderRadius = '50%';
   spiral.style.background = 'conic-gradient(from 0deg, rgba(255,255,255,0.1), rgba(100,100,200,0.4), rgba(255,255,255,0.1))';
-  spiral.style.animation = 'spin 20s linear infinite';
   spiral.style.opacity = '0.7';
   spiral.style.boxShadow = '0 0 100px 50px rgba(255,255,255,0.1)';
-  
-  // Add custom animation
+    // Add custom animation
   const styleElement = document.createElement('style');
   styleElement.textContent = `
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    /* Static hurricane styles - no animations */
+    .hurricane-static {
+      opacity: 0.7;
     }
   `;
   
   area.appendChild(styleElement);
   area.appendChild(spiral);
-  
-  // Add rain effect
+    // Add rain effect
   for (let i = 0; i < 100; i++) {
     const rain = document.createElement('div');
-    rain.className = "absolute bg-blue-200 rounded-full animate-rain";
+    rain.className = "absolute bg-blue-200 rounded-full";
     rain.style.width = '2px';
     rain.style.height = '15px';
     rain.style.transform = 'rotate(15deg)';
     rain.style.left = `${Math.random() * 800}px`;
     rain.style.top = `${Math.random() * 800}px`;
     rain.style.opacity = '0.6';
-    rain.style.animationDuration = `${0.5 + Math.random() * 0.3}s`;
     area.appendChild(rain);
   }
   
@@ -1827,8 +1581,7 @@ const createHurricaneEffect = (container, position) => {
 
 const createFireEffect = (container, position) => {
   console.log("Creating FIRE effect at position:", position);
-  
-  // Add very subtle warm overlay for minimalistic effect
+    // Add very subtle warm overlay for minimalistic effect
   const overlay = document.createElement('div');
   overlay.className = "absolute inset-0";
   overlay.style.background = 'radial-gradient(circle at center, rgba(255,100,0,0.1) 0%, rgba(255,0,0,0.05) 70%, rgba(0,0,0,0) 100%)';
@@ -1852,12 +1605,10 @@ const createFireEffect = (container, position) => {
   glow.className = "absolute rounded-full";
   glow.style.width = '200px'; // Smaller glow
   glow.style.height = '100px'; // Smaller glow
-  glow.style.background = 'radial-gradient(ellipse at center, rgba(255,140,0,0.3) 0%, rgba(255,69,0,0.2) 50%, rgba(255,0,0,0) 70%)';
-  glow.style.left = '50%';
+  glow.style.background = 'radial-gradient(ellipse at center, rgba(255,140,0,0.3) 0%, rgba(255,69,0,0.2) 50%, rgba(255,0,0,0) 70%)';  glow.style.left = '50%';
   glow.style.bottom = '0px';
   glow.style.transform = 'translateX(-50%)';
   glow.style.filter = 'blur(8px)';
-  glow.style.animation = 'pulse 3s ease-in-out infinite alternate';
   area.appendChild(glow);
   
   // Add much lighter smoke with less density
@@ -1872,11 +1623,8 @@ const createFireEffect = (container, position) => {
     
     // Lighter smoke for minimalist effect
     const grayValue = Math.floor(Math.random() * 80) + 150; // 150-230 (much lighter smoke)
-    smoke.style.backgroundColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
-    smoke.style.opacity = `${0.2 + Math.random() * 0.2}`; // Lower opacity
+    smoke.style.backgroundColor = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;    smoke.style.opacity = `${0.2 + Math.random() * 0.2}`; // Lower opacity
     
-    smoke.style.animation = `rise ${2 + Math.random() * 2}s linear infinite`;
-    smoke.style.animationDelay = `${Math.random() * 2}s`;
     area.appendChild(smoke);
   }
   
@@ -1905,12 +1653,9 @@ const createFireEffect = (container, position) => {
       flame.style.background = `radial-gradient(ellipse at bottom, rgba(255,70,20,0.5), transparent)`;
     } else {
       const hue = isLargeFlame ? (20 + Math.random() * 15) : (25 + Math.random() * 20);
-      flame.style.background = `radial-gradient(ellipse at bottom, hsl(${hue}, 80%, ${isLargeFlame ? 60 : 55}%), transparent)`;
-    }
+      flame.style.background = `radial-gradient(ellipse at bottom, hsl(${hue}, 80%, ${isLargeFlame ? 60 : 55}%), transparent)`;    }
     
     // Subtler animation
-    flame.style.animation = `flicker ${0.5 + Math.random() * 0.5}s ease-in-out infinite alternate`;
-    flame.style.animationDelay = `${Math.random()}s`;
     flame.style.transformOrigin = 'center bottom';
     
     area.appendChild(flame);
